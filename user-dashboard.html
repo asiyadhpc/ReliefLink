@@ -847,25 +847,34 @@ a { color:inherit; }
     </div>
 </div>
 
-<!-- Photo Proof Upload Modal (AWS S3) -->
+<!-- Live Camera Photo Proof Modal (AWS S3) -->
 <div class="modal" id="proofModal" aria-hidden="true">
     <div class="modal-card">
         <button type="button" class="modal-x" data-close="proofModal" aria-label="Close">✕</button>
-        <h3>📷 Upload Photo Proof</h3>
-        <p style="margin:6px 0 14px;font-size:12.5px;line-height:1.6;color:var(--muted);">
-            Attach a photo showing the relief assistance delivered. It will be stored securely on Amazon S3 and marked as <strong>Helped</strong>.
+        <h3>📷 Capture Live Photo Proof</h3>
+        <p style="margin:6px 0 12px;font-size:12.5px;line-height:1.6;color:var(--muted);">
+            Take a live photo right now to verify relief assistance. Gallery/old file uploads are disabled.
         </p>
         <input type="hidden" id="proofRequestId" value="">
-        <div class="field">
-            <label for="proofPhotoInput">Select Photo (JPG, PNG, WEBP · Max 5 MB) <span class="req">*</span></label>
-            <input type="file" id="proofPhotoInput" accept="image/png,image/jpeg,image/webp,image/gif">
+
+        <!-- Live Camera Video Stream -->
+        <div id="cameraStreamWrap" style="margin-bottom:12px;">
+            <video id="proofVideo" autoplay playsinline muted style="width:100%;max-height:240px;object-fit:cover;border-radius:12px;background:#000;border:1px solid var(--border);"></video>
         </div>
-        <div id="proofPreviewWrap" style="display:none;margin-bottom:14px;">
-            <img id="proofPreviewImg" alt="Photo proof preview" style="width:100%;max-height:220px;object-fit:contain;border-radius:12px;border:1px solid var(--border);background:var(--surface2);">
+
+        <!-- Captured Snapshot Preview -->
+        <div id="proofPreviewWrap" style="display:none;margin-bottom:12px;">
+            <img id="proofPreviewImg" alt="Live photo proof preview" style="width:100%;max-height:240px;object-fit:contain;border-radius:12px;border:1px solid var(--border);background:var(--surface2);">
         </div>
+
+        <!-- Mobile Camera-Only Fallback (used if HTTP blocks WebRTC) -->
+        <input type="file" id="proofCameraFallback" accept="image/*" capture="environment" style="display:none;">
+
         <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;">
             <button type="button" class="small-btn" data-close="proofModal">Cancel</button>
-            <button type="button" class="btn" id="submitProofBtn">✓ Upload &amp; Confirm Helped</button>
+            <button type="button" class="btn" id="captureSnapBtn">📸 Capture Photo</button>
+            <button type="button" class="small-btn" id="retakeSnapBtn" style="display:none;">↻ Retake</button>
+            <button type="button" class="btn" id="submitProofBtn" style="display:none;">✓ Upload &amp; Confirm Helped</button>
         </div>
     </div>
 </div>
@@ -1320,9 +1329,9 @@ function helpActionHTML(item) {
             return `<button class="mini-btn wait" type="button" disabled>⏳ Processing (Awaiting Volunteer Proceed)...</button>`;
         }
         if (offerStatus === "Approved" || item.status === "In Progress") {
-            return `<div class="confirm-box" style="width:100%;margin:0;"><b>Volunteer approved! Upload photo proof to confirm help:</b>
+            return `<div class="confirm-box" style="width:100%;margin:0;"><b>Volunteer approved! Capture live photo proof to confirm help:</b>
                 <div class="item-actions" style="margin:0;">
-                    <button class="mini-btn yes" type="button" data-confirm-id="${id}" data-choice="Helped">📷 Helped (Upload Proof)</button>
+                    <button class="mini-btn yes" type="button" data-confirm-id="${id}" data-choice="Helped">📷 Helped (Live Photo)</button>
                     <button class="mini-btn no" type="button" data-confirm-id="${id}" data-choice="Not Helped">✕ Not Helped</button>
                 </div></div>`;
         }
@@ -1421,7 +1430,7 @@ function renderMyRequests() {
         if (stage === 2) {
             extra = `<div class="confirm-box"><b>Did the volunteer/helper provide help?</b>
                 <div class="item-actions" style="margin:0;">
-                    <button class="mini-btn yes" type="button" data-confirm-id="${id}" data-choice="Helped">📷 Helped (Upload Proof)</button>
+                    <button class="mini-btn yes" type="button" data-confirm-id="${id}" data-choice="Helped">📷 Helped (Live Photo)</button>
                     <button class="mini-btn no" type="button" data-confirm-id="${id}" data-choice="Not Helped">✕ Not Helped</button>
                 </div></div>`;
         } else if (offerStatus === "Not Helped") {
@@ -1429,7 +1438,7 @@ function renderMyRequests() {
         }
 
         if (item.proof_url) {
-            extra += `<div class="pickup-msg">📷 Photo proof verified on AWS S3 · <a href="${escapeHTML(item.proof_url)}" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;font-weight:800;">View Photo Proof</a></div>`;
+            extra += `<div class="pickup-msg">📷 Live photo proof verified on AWS S3 · <a href="${escapeHTML(item.proof_url)}" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;font-weight:800;">View Photo Proof</a></div>`;
         }
 
         let emailInfo = emailPillHTML("request", idOf(item), item, "Receipt email");
@@ -1585,7 +1594,7 @@ function renderNotifications() {
             if (stage === 1) items.push(["🙋", `Someone offered to help with your request #RL-${id}. Waiting for volunteer approval.` + (item.offer_email_sent === true ? " An email alert was sent to you." : ""), "requests"]);
             if (stage === 2) items.push(["✅", `Help is on the way for #RL-${id}. Please confirm when you receive it.`, "requests"]);
         } else if (String(item.helper_email || "").trim().toLowerCase() === me && stage === 2) {
-            items.push(["🤝", `Your offer for #RL-${id} was approved. Upload photo proof once you have helped.`, "community"]);
+            items.push(["🤝", `Your offer for #RL-${id} was approved. Capture live photo proof once you have helped.`, "community"]);
         }
     });
     state.donations.forEach(d => {
@@ -1607,7 +1616,11 @@ $("bellBtn").addEventListener("click", e => { e.stopPropagation(); $("notifPop")
 
 /* ====================== MODALS ====================== */
 function openModal(id) { $(id).classList.add("active"); $(id).setAttribute("aria-hidden", "false"); }
-function closeModal(id) { $(id).classList.remove("active"); $(id).setAttribute("aria-hidden", "true"); }
+function closeModal(id) {
+    if (id === "proofModal") stopProofCamera();
+    $(id).classList.remove("active");
+    $(id).setAttribute("aria-hidden", "true");
+}
 
 function showRequestDetails(id) {
     const item = state.requests.find(r => String(idOf(r)) === String(id));
@@ -1626,51 +1639,113 @@ function showRequestDetails(id) {
     openModal("infoModal");
 }
 
-/* ====================== PHOTO PROOF MODAL (AWS S3) ====================== */
-function openProofModal(id) {
-    $("proofRequestId").value = id;
-    $("proofPhotoInput").value = "";
-    $("proofPreviewWrap").style.display = "none";
-    $("proofPreviewImg").src = "";
-    openModal("proofModal");
+/* ====================== LIVE CAMERA PHOTO PROOF MODAL (AWS S3) ====================== */
+let proofStream = null;
+let capturedProofBlob = null;
+
+function stopProofCamera() {
+    if (proofStream) {
+        proofStream.getTracks().forEach(track => track.stop());
+        proofStream = null;
+    }
+    const video = $("proofVideo");
+    if (video) video.srcObject = null;
 }
 
-$("proofPhotoInput").addEventListener("change", e => {
-    const file = e.target.files?.[0];
-    if (!file) {
-        $("proofPreviewWrap").style.display = "none";
+async function startProofCamera() {
+    capturedProofBlob = null;
+    $("proofPreviewWrap").style.display = "none";
+    $("proofPreviewImg").src = "";
+    $("retakeSnapBtn").style.display = "none";
+    $("submitProofBtn").style.display = "none";
+    $("captureSnapBtn").style.display = "inline-flex";
+    $("cameraStreamWrap").style.display = "block";
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        toast("Live webcam unavailable on HTTP. Opening device camera...", "info");
+        $("proofCameraFallback").click();
         return;
     }
-    if (!file.type.startsWith("image/")) {
-        toast("Please select a valid image file.", "error");
-        e.target.value = "";
+
+    try {
+        proofStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { ideal: "environment" } },
+            audio: false
+        });
+        $("proofVideo").srcObject = proofStream;
+    } catch (err) {
+        console.warn("Camera access blocked or unavailable:", err);
+        toast("Browser blocked live webcam on HTTP. Opening camera capture...", "info");
+        $("proofCameraFallback").click();
+    }
+}
+
+function openProofModal(id) {
+    $("proofRequestId").value = id;
+    $("proofCameraFallback").value = "";
+    openModal("proofModal");
+    startProofCamera();
+}
+
+$("captureSnapBtn").addEventListener("click", () => {
+    const video = $("proofVideo");
+    if (!video || !video.videoWidth) {
+        toast("Camera is still starting. Wait a second and tap Capture again.", "error");
         return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-        toast("The image must be 5 MB or smaller.", "error");
-        e.target.value = "";
-        return;
-    }
-    const reader = new FileReader();
-    reader.onload = evt => {
-        $("proofPreviewImg").src = evt.target.result;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    canvas.toBlob(blob => {
+        if (!blob) {
+            toast("Could not capture image. Please try again.", "error");
+            return;
+        }
+        capturedProofBlob = blob;
+        $("proofPreviewImg").src = URL.createObjectURL(blob);
+        stopProofCamera();
+        $("cameraStreamWrap").style.display = "none";
         $("proofPreviewWrap").style.display = "block";
-    };
-    reader.readAsDataURL(file);
+        $("captureSnapBtn").style.display = "none";
+        $("retakeSnapBtn").style.display = "inline-flex";
+        $("submitProofBtn").style.display = "inline-flex";
+    }, "image/jpeg", 0.88);
+});
+
+$("retakeSnapBtn").addEventListener("click", () => {
+    startProofCamera();
+});
+
+$("proofCameraFallback").addEventListener("change", e => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+        toast("Please capture a valid photo.", "error");
+        return;
+    }
+    capturedProofBlob = file;
+    $("proofPreviewImg").src = URL.createObjectURL(file);
+    $("cameraStreamWrap").style.display = "none";
+    $("proofPreviewWrap").style.display = "block";
+    $("captureSnapBtn").style.display = "none";
+    $("retakeSnapBtn").style.display = "inline-flex";
+    $("submitProofBtn").style.display = "inline-flex";
 });
 
 $("submitProofBtn").addEventListener("click", async () => {
     const id = $("proofRequestId").value;
-    const file = $("proofPhotoInput").files?.[0];
     if (!id) return;
-    if (!file) {
-        toast("Please select a photo proof image first.", "error");
+    if (!capturedProofBlob) {
+        toast("Please capture a live photo first.", "error");
         return;
     }
 
     const btn = $("submitProofBtn");
     const formData = new FormData();
-    formData.append("photo", file);
+    formData.append("photo", capturedProofBlob, `live_proof_${id}.jpg`);
 
     try {
         btn.disabled = true;
@@ -1679,11 +1754,12 @@ $("submitProofBtn").addEventListener("click", async () => {
             method: "POST",
             body: formData
         });
+        stopProofCamera();
         closeModal("proofModal");
-        toast("Photo proof uploaded to AWS S3 and marked as Helped!", "success");
+        toast("Live photo proof uploaded to AWS S3 and marked as Helped!", "success");
         await loadRequests();
     } catch (err) {
-        toast(err.message || "Failed to upload photo proof.", "error");
+        toast(err.message || "Failed to upload live photo proof.", "error");
     } finally {
         btn.disabled = false;
         btn.textContent = "✓ Upload & Confirm Helped";
