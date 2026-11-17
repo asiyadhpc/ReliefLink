@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReliefLink | Volunteer Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+    --navy: #092d46;
+    --navy-deep: #06243a;
+    --teal: #079b91;
+    --teal-light: #20d4c5;
+    --teal-dark: #056a63;
+    --amber: #f59e0b;
+    --blue: #2563eb;
+    --green: #10b981;
+    --red: #ef4444;
+    --bg: #eef4f8;
+    --surface: #ffffff;
+    --surface-2: #f6f9fb;
+    --border: #dce7ee;
+    --text: #1d354d;
+    --muted: #647a8f;
+    --shadow: 0 6px 22px rgba(9, 45, 70, 0.07);
+}
+[data-theme="dark"] {
+    --bg: #07192a;
+    --surface: #0d2a40;
+    --surface-2: #0a2235;
+    --border: #1c4059;
+    --text: #e6f1f7;
+    --muted: #91aabd;
+    --navy: #e6f1f7;
+    --shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+    margin: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+    background: radial-gradient(1200px 500px at 80% -10%, rgba(7,155,145,0.12), transparent 60%), var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+/* ---------- Top bar ---------- */
+.topbar {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    padding: 12px 28px;
+    background: rgba(6, 36, 58, 0.96);
+    backdrop-filter: blur(10px);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(6, 36, 58, 0.25);
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.brand-icon {
+    width: 42px; height: 42px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--teal-light), var(--teal));
+    display: grid; place-items: center; font-size: 22px;
+    box-shadow: 0 6px 16px rgba(32, 212, 197, 0.35);
+}
+.brand h2 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.2px; }
+.brand small { display: block; font-size: 9px; letter-spacing: 1.6px; color: #a5d8d3; font-weight: 700; }
+
+.nav-links { display: flex; gap: 6px; }
+.nav-links a {
+    color: #cfe3ee; text-decoration: none; font-size: 13px; font-weight: 600;
+    padding: 8px 14px; border-radius: 10px; transition: background .2s;
+}
+.nav-links a:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+.top-right { display: flex; align-items: center; gap: 12px; }
+.clock { text-align: right; line-height: 1.25; }
+.clock b { display: block; font-size: 16px; font-weight: 800; }
+.clock span { font-size: 11px; color: #a5c4d4; }
+.badge { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.badge-online { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; }
+.badge-offline { background: rgba(229, 57, 53, 0.2); color: #f87171; border: 1px solid #ef4444; }
+.icon-btn {
+    width: 40px; height: 40px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.08); color: #fff; cursor: pointer; font-size: 17px;
+}
+.icon-btn:hover { background: rgba(255,255,255,0.16); }
+.btn-logout {
+    background: linear-gradient(135deg, #f0523f, #e5391f); color: #fff; border: 0;
+    padding: 10px 18px; border-radius: 12px; cursor: pointer; font-weight: 700; font-size: 13px;
+    box-shadow: 0 6px 16px rgba(229, 57, 31, 0.35);
+}
+.btn-logout:hover { filter: brightness(1.08); }
+
+/* ---------- Layout ---------- */
+.content { max-width: 1320px; margin: 0 auto; padding: 26px 24px 70px; }
+
+/* ---------- Hero ---------- */
+.hero-banner {
+    position: relative; overflow: hidden;
+    padding: 38px 40px; border-radius: 24px; margin-bottom: 24px; color: #fff;
+    background:
+        radial-gradient(500px 260px at 90% 20%, rgba(32,212,197,0.35), transparent 65%),
+        radial-gradient(380px 220px at 60% 110%, rgba(245,158,11,0.18), transparent 65%),
+        linear-gradient(135deg, #06243a 0%, #0b455b 100%);
+    box-shadow: 0 16px 40px rgba(6, 36, 58, 0.28);
+    display: flex; justify-content: space-between; align-items: center; gap: 28px; flex-wrap: wrap;
+}
+.hero-banner::after {
+    content: "💚"; position: absolute; right: 36px; bottom: -34px; font-size: 190px; opacity: 0.07;
+}
+.hero-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 7px 14px; border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: 1.4px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(32,212,197,0.6); color: #d9f7f3;
+    margin-bottom: 16px;
+}
+.hero-chip i { width: 8px; height: 8px; border-radius: 50%; background: var(--teal-light); display: inline-block; }
+.hero-banner h1 { margin: 0 0 10px; font-size: 38px; line-height: 1.12; font-weight: 800; letter-spacing: -0.8px; }
+.hero-banner h1 span { color: var(--teal-light); }
+.hero-banner p { margin: 0; font-size: 15px; color: #cfe3ee; line-height: 1.65; max-width: 560px; }
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; position: relative; z-index: 1; }
+.hero-btn {
+    padding: 13px 22px; border-radius: 14px; font-weight: 700; font-size: 14px; border: 0; cursor: pointer;
+    text-decoration: none; display: inline-block;
+}
+.hero-btn.primary { background: linear-gradient(135deg, var(--teal-light), var(--teal)); color: #fff; box-shadow: 0 8px 20px rgba(7,155,145,0.4); }
+.hero-btn.ghost { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.25); }
+.hero-btn:hover { filter: brightness(1.08); }
+
+/* ---------- Stats ---------- */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 24px; }
+.stat-card {
+    background: var(--surface); border: 1px solid var(--border); border-left: 5px solid var(--c, var(--teal));
+    border-radius: 18px; padding: 20px; box-shadow: var(--shadow);
+    display: flex; align-items: center; gap: 16px;
+}
+.stat-icon {
+    width: 54px; height: 54px; border-radius: 15px; display: grid; place-items: center; font-size: 24px;
+    background: color-mix(in srgb, var(--c, var(--teal)) 14%, transparent);
+    color: var(--c, var(--teal)); flex-shrink: 0;
+}
+.stat-card small { display: block; font-size: 12.5px; color: var(--muted); font-weight: 600; }
+.stat-card strong { display: block; font-size: 32px; font-weight: 800; color: var(--navy); line-height: 1.1; margin-top: 2px; }
+
+/* ---------- Cards ---------- */
+.card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 22px;
+    padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow);
+}
+.card-head {
+    display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap;
+    margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
+}
+.card-title { display: flex; align-items: center; gap: 14px; }
+.card-title .ico {
+    width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; font-size: 22px; color: #fff;
+    background: linear-gradient(135deg, #14b8a6, #0d9488);
+}
+.card-title .ico.orange { background: linear-gradient(135deg, #fb923c, #ea580c); }
+.card-title .ico.amber { background: linear-gradient(135deg, #fbbf24, #d97706); }
+.card-head h2 { margin: 0; font-size: 20px; color: var(--navy); letter-spacing: -0.2px; }
+.card-head p { margin: 3px 0 0; font-size: 13px; color: var(--muted); }
+
+.btn {
+    padding: 10px 16px; border: 0; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer;
+    background: var(--teal); color: #fff; transition: transform .15s, filter .15s;
+}
+.btn:hover { filter: brightness(1.08); }
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: .6; cursor: not-allowed; }
+.btn-proceed { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+.btn-resolved { background: linear-gradient(135deg, #34d399, #10b981); }
+.btn-schedule { background: linear-gradient(135deg, #fbbf24, #d97706); }
+.btn-light {
+    background: var(--surface); color: var(--navy); border: 1px solid var(--border);
+}
+
+/* ---------- Filters ---------- */
+.filter-row { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.filter-row input, .filter-row select {
+    padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; font-size: 13px;
+    background: var(--surface-2); color: var(--text); font-family: inherit;
+}
+.filter-row input { flex: 1; min-width: 220px; }
+.filter-row input:focus, .filter-row select:focus,
+.field input:focus, .field select:focus, .field textarea:focus {
+    outline: 2px solid var(--teal); outline-offset: 1px; border-color: transparent;
+}
+
+/* ---------- Scrollable requests ---------- */
+.table-wrap {
+    max-height: 520px;
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface);
+}
+.table-wrap::-webkit-scrollbar { width: 10px; height: 10px; }
+.table-wrap::-webkit-scrollbar-thumb { background: #b8cbd8; border-radius: 10px; border: 2px solid var(--surface); }
+.table-wrap::-webkit-scrollbar-thumb:hover { background: var(--teal); }
+table { width: 100%; min-width: 980px; border-collapse: separate; border-spacing: 0; font-size: 13px; text-align: left; }
+th {
+    position: sticky; top: 0; z-index: 2;
+    background: var(--surface-2); color: var(--muted); font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.8px; padding: 14px 14px; border-bottom: 2px solid var(--border);
+}
+td { padding: 15px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover td { background: var(--surface-2); }
+.req-id { font-weight: 800; color: var(--teal-dark); }
+[data-theme="dark"] .req-id { color: var(--teal-light); }
+.person b { display: block; color: var(--navy); }
+.person small { color: var(--muted); font-size: 12px; }
+.desc { max-width: 260px; color: var(--text); line-height: 1.5; }
+.desc small { display: block; margin-top: 6px; color: var(--muted); font-size: 12px; }
+.map-link { color: var(--teal); font-weight: 700; text-decoration: underline; }
+
+.pill { display: inline-block; padding: 5px 11px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.pill-High { background: #fee2e2; color: #b91c1c; }
+.pill-Medium { background: #fef3c7; color: #b45309; }
+.pill-Low { background: #d1fae5; color: #065f46; }
+.pill-blood { background: #fee2e2; color: #b91c1c; }
+.pill-done { background: #e0f2fe; color: #0369a1; }
+.pill-status-Pending { background: #fef3c7; color: #b45309; }
+.pill-status-In-Progress { background: #dbeafe; color: #1d4ed8; }
+.pill-status-Resolved { background: #d1fae5; color: #065f46; }
+.pill-don-available { background: #fef3c7; color: #b45309; }
+.pill-don-scheduled { background: #dbeafe; color: #1d4ed8; }
+.pill-don-picked { background: #d1fae5; color: #065f46; }
+.helper-badge { margin-top: 8px; padding: 7px 10px; border-radius: 10px; background: rgba(37, 99, 235, 0.12); color: #1d4ed8; font-size: 11.5px; font-weight: 700; line-height: 1.45; }
+[data-theme="dark"] .helper-badge { color: #93c5fd; }
+.muted { color: #94a3b8; }
+.empty-state { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 14px; }
+.count-note { font-size: 12px; color: var(--muted); margin: 10px 2px 0; }
+.pickup-note { margin-top: 8px; padding: 8px 10px; border-radius: 10px; background: rgba(16,185,129,0.12); color: #047857; font-size: 12px; font-weight: 600; line-height: 1.45; }
+[data-theme="dark"] .pickup-note { color: #34d399; }
+
+/* ---------- Form ---------- */
+.form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 18px; }
+.field { margin-bottom: 14px; }
+.field.full { grid-column: 1 / -1; }
+.field label { display: block; font-size: 12.5px; font-weight: 700; margin-bottom: 7px; color: var(--navy); }
+.field input, .field select, .field textarea {
+    width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px;
+    font-size: 13.5px; font-family: inherit; background: var(--surface-2); color: var(--text);
+}
+.field textarea { resize: vertical; min-height: 100px; }
+.field input[type="file"] { padding: 10px; background: var(--surface); border-style: dashed; }
+#imgPreview { display: none; margin-top: 10px; max-height: 170px; border-radius: 14px; border: 1px solid var(--border); }
+.form-foot { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.form-foot small { color: var(--muted); font-size: 12px; }
+
+/* ---------- Modal ---------- */
+.modal {
+    display: none; position: fixed; inset: 0; z-index: 200; align-items: center; justify-content: center;
+    padding: 16px; background: rgba(9, 45, 70, 0.65); backdrop-filter: blur(4px);
+}
+.modal.active { display: flex; }
+.modal-card {
+    position: relative; width: 100%; max-width: 460px; max-height: 90vh; overflow-y: auto;
+    padding: 26px; border-radius: 20px; background: var(--surface); color: var(--text);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+.modal-card h3 { margin: 0 0 4px; font-size: 19px; color: var(--navy); }
+.modal-card .sub { margin: 0 0 16px; font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+.modal-x {
+    position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; border: 0; border-radius: 50%;
+    background: var(--surface-2); color: var(--navy); font-size: 15px; font-weight: 700; cursor: pointer;
+}
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; margin-top: 6px; }
+.donor-chip { display: inline-block; margin-bottom: 14px; padding: 6px 12px; border-radius: 20px; background: var(--surface-2); border: 1px solid var(--border); font-size: 12px; font-weight: 700; color: var(--navy); overflow-wrap: anywhere; }
+
+/* ---------- Toast ---------- */
+.toast {
+    position: fixed; right: 24px; bottom: 24px; z-index: 300; max-width: 360px;
+    padding: 14px 18px; border-radius: 14px; color: #fff; font-weight: 600; font-size: 14px;
+    background: #0b455b; box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+    transform: translateY(30px); opacity: 0; pointer-events: none; transition: all .3s;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.ok { background: linear-gradient(135deg, #059669, #10b981); }
+.toast.err { background: linear-gradient(135deg, #dc2626, #ef4444); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1000px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .nav-links { display: none; }
+}
+@media (max-width: 680px) {
+    .topbar { padding: 10px 14px; }
+    .clock, .brand small { display: none; }
+    .content { padding: 16px 14px 60px; }
+    .hero-banner { padding: 26px 22px; }
+    .hero-banner h1 { font-size: 28px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .stat-card strong { font-size: 26px; }
+}
+@media (max-width: 440px) {
+    .stats-grid { grid-template-columns: 1fr; }
+    .badge-online, .badge-offline { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; scroll-behavior: auto !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== Top bar ===== -->
+<header class="topbar">
+    <div class="brand">
+        <div class="brand-icon">💚</div>
+        <div>
+            <h2>ReliefLink</h2>
+            <small>COMMUNITY EMERGENCY</small>
+        </div>
+    </div>
+
+    <nav class="nav-links">
+        <a href="#overview">Overview</a>
+        <a href="#requests">Requests</a>
+        <a href="#donations">Donations</a>
+        <a href="#alerts">Post Alert</a>
+    </nav>
+
+    <div class="top-right">
+        <div class="clock"><b id="clockTime">--:--</b><span id="clockDate"></span></div>
+        <span class="badge badge-online" id="serverStatusBadge">● Server online</span>
+        <button class="icon-btn" id="themeBtn" title="Toggle dark mode" aria-label="Toggle dark mode">🌙</button>
+        <button class="btn-logout" id="logoutBtn">⇥ Logout</button>
+    </div>
+</header>
+
+<main class="content">
+
+    <!-- ===== Hero ===== -->
+    <section class="hero-banner" id="overview">
+        <div style="position:relative; z-index:1;">
+            <span class="hero-chip"><i></i> VOLUNTEER DASHBOARD</span>
+            <h1 id="greeting">Good day, <span>Volunteer</span> 👋</h1>
+            <p>Review community emergency requests, collect item donations, and post live safety incident alerts for your neighbours.</p>
+        </div>
+        <div class="hero-actions">
+            <a class="hero-btn primary" href="#requests">View Requests</a>
+            <a class="hero-btn ghost" href="#donations">🎁 View Donations</a>
+            <a class="hero-btn ghost" href="#alerts">📢 Post Alert</a>
+        </div>
+    </section>
+
+    <!-- ===== Stats ===== -->
+    <section class="stats-grid">
+        <div class="stat-card" style="--c:#f59e0b;">
+            <div class="stat-icon">🕒</div>
+            <div><small>Open Requests</small><strong id="statOpen">0</strong></div>
+        </div>
+        <div class="stat-card" style="--c:#2563eb;">
+            <div class="stat-icon">⚡</div>
+            <div><small>In Progress</small><strong id="statProgress">0</strong></div>
+        </div>
+        <div class="stat-card" style="--c:#10b981;">
+            <div class="stat-icon">✓</div>
+            <div><small>Completed</small><strong id="statResolved">0</strong></div>
+        </div>
+        <div class="stat-card" style="--c:#7c3aed;">
+            <div class="stat-icon">📋</div>
+            <div><small>Total Requests</small><strong id="statTotal">0</strong></div>
+        </div>
+    </section>
+
+    <!-- ===== 1. Community Requests ===== -->
+    <section class="card" id="requests">
+        <div class="card-head">
+            <div class="card-title">
+                <div class="ico">🤝</div>
+                <div>
+                    <h2>Community User Requests</h2>
+                    <p>Contact number, blood group, location, helper offers and description of every request.</p>
+                </div>
+            </div>
+            <button class="btn" id="refreshRequestsBtn">↻ Refresh</button>
+        </div>
+
+        <div class="filter-row">
+            <input type="search" id="requestSearch" placeholder="🔍 Search requests by user, blood group, location, type...">
+            <select id="statusFilter">
+                <option value="all">All Statuses</option>
+                <option value="Pending">Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
+            </select>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Requester / Contact</th>
+                        <th>Blood Group</th>
+                        <th>Type</th>
+                        <th>Location &amp; PIN</th>
+                        <th>Description &amp; Helper Offer</th>
+                        <th>Priority</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="requestsTableBody">
+                    <tr><td colspan="8" class="empty-state">Loading requests...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="count-note" id="countNote"></div>
+    </section>
+
+    <!-- ===== 2. Community Item Donations ===== -->
+    <section class="card" id="donations">
+        <div class="card-head">
+            <div class="card-title">
+                <div class="ico amber">🎁</div>
+                <div>
+                    <h2>Community Item Donations</h2>
+                    <p>Food, medicine and clothing offered by users. Schedule a pickup and notify the donor.</p>
+                </div>
+            </div>
+            <button class="btn" id="refreshDonationsBtn">↻ Refresh</button>
+        </div>
+
+        <div class="filter-row">
+            <input type="search" id="donationSearch" placeholder="🔍 Search donations by donor, category, location, items...">
+            <select id="donationStatusFilter">
+                <option value="all">All Statuses</option>
+                <option value="available">Awaiting Pickup</option>
+                <option value="scheduled">Pickup Scheduled</option>
+                <option value="picked">Picked</option>
+            </select>
+        </div>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Donor / Contact</th>
+                        <th>Category</th>
+                        <th>Items &amp; Details</th>
+                        <th>Pickup Location</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="donationsTableBody">
+                    <tr><td colspan="7" class="empty-state">Loading donations...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="count-note" id="donationCountNote"></div>
+    </section>
+
+    <!-- ===== 3. Post Community Alert ===== -->
+    <section class="card" id="alerts">
+        <div class="card-head">
+            <div class="card-title">
+                <div class="ico orange">📢</div>
+                <div>
+                    <h2>Post a Community Alert</h2>
+                    <p>Share roadblocks, flooding or safety hazards with photos. They appear live on the User Dashboard.</p>
+                </div>
+            </div>
+        </div>
+
+        <form id="incidentForm">
+            <div class="form-grid">
+                <div class="field">
+                    <label>Alert Category *</label>
+                    <select id="incCategory" required>
+                        <option value="">Select a category</option>
+                        <option value="Roadblock">🚧 Roadblock / Tree Fall</option>
+                        <option value="Flood">🌊 Flooding / Waterlogging</option>
+                        <option value="Accident">🚑 Traffic Accident</option>
+                        <option value="Power Outage">⚡ Power Outage</option>
+                        <option value="General Alert">⚠️ General Alert</option>
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label>Location / Area *</label>
+                    <input type="text" id="incLocation" placeholder="e.g. Kakkanchery, NH 66" required>
+                </div>
+
+                <div class="field full">
+                    <label>Description *</label>
+                    <textarea id="incDescription" placeholder="Describe the incident, road blockage, or advice for residents..." required></textarea>
+                </div>
+
+                <div class="field full">
+                    <label>Attach Photo (Optional)</label>
+                    <input type="file" id="incImage" accept="image/*">
+                    <img id="imgPreview" alt="Selected photo preview">
+                </div>
+            </div>
+
+            <div class="form-foot">
+                <button type="submit" class="btn btn-proceed" id="postIncidentBtn" style="padding:13px 26px; font-size:14px;">📢 Publish Alert</button>
+                <small>Your alert is visible to all community members right away.</small>
+            </div>
+        </form>
+    </section>
+</main>
+
+<!-- ===== Schedule Pickup Modal ===== -->
+<div class="modal" id="scheduleModal" aria-hidden="true">
+    <div class="modal-card">
+        <button type="button" class="modal-x" id="scheduleClose" aria-label="Close">✕</button>
+        <h3>📦 Schedule Pickup</h3>
+        <p class="sub">Write a short pickup message or ETA. The donor will see it on their dashboard and may also receive it by email.</p>
+        <span class="donor-chip" id="scheduleDonor">Donor</span>
+
+        <form id="scheduleForm">
+            <div class="field">
+                <label for="scheduleVolunteer">Your name</label>
+                <input type="text" id="scheduleVolunteer" maxlength="100" placeholder="Volunteer name">
+            </div>
+            <div class="field">
+                <label for="scheduleMessage">Pickup message / ETA *</label>
+                <textarea id="scheduleMessage" maxlength="500" required placeholder="e.g. I will collect the items tomorrow between 10 AM and 12 PM."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-light" id="scheduleCancel">Cancel</button>
+                <button type="submit" class="btn btn-schedule" id="scheduleSubmit">✉️ Schedule &amp; Notify Donor</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+let requestsData = [];
+let donationsData = [];
+let donationsError = false;
+let scheduleTargetId = null;
+
+/* ---------- Session ---------- */
+function getSession() {
+    try { return JSON.parse(localStorage.getItem("rl_session") || "null"); }
+    catch (e) { return null; }
+}
+const volunteerEmail = () => String((getSession() || {}).email || "").trim().toLowerCase();
+function volunteerName() {
+    const s = getSession() || {};
+    return String(s.name || s.username || s.full_name || (s.email ? s.email.split("@")[0] : "") || "Volunteer");
+}
+
+/* ---------- Logout ---------- */
+$("logoutBtn").addEventListener("click", () => {
+    localStorage.removeItem("rl_session");
+    window.location.href = "login.html";
+});
+
+/* ---------- Toast ---------- */
+let toastTimer;
+function toast(msg, type) {
+    const t = $("toast");
+    t.textContent = msg;
+    t.className = "toast show " + (type || "");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.className = "toast " + (type || ""); }, 3800);
+}
+
+/* ---------- Theme ---------- */
+(function initTheme() {
+    try {
+        if (localStorage.getItem("rl_volunteer_theme") === "dark") {
+            document.documentElement.setAttribute("data-theme", "dark");
+            $("themeBtn").textContent = "☀️";
+        }
+    } catch (e) {}
+})();
+$("themeBtn").addEventListener("click", () => {
+    const dark = document.documentElement.getAttribute("data-theme") === "dark";
+    if (dark) document.documentElement.removeAttribute("data-theme");
+    else document.documentElement.setAttribute("data-theme", "dark");
+    $("themeBtn").textContent = dark ? "🌙" : "☀️";
+    try { localStorage.setItem("rl_volunteer_theme", dark ? "light" : "dark"); } catch (e) {}
+});
+
+/* ---------- Clock + greeting ---------- */
+function tick() {
+    const d = new Date();
+    $("clockTime").textContent = d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+    $("clockDate").textContent = d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+}
+tick();
+setInterval(tick, 30000);
+
+(function setGreeting() {
+    const h = new Date().getHours();
+    const part = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+    let name = "Volunteer";
+    try {
+        const s = getSession();
+        const n = s && (s.name || s.username || s.full_name || (s.user && (s.user.name || s.user.username)) || (s.email ? s.email.split("@")[0] : ""));
+        if (n) name = String(n);
+    } catch (e) {}
+    $("greeting").innerHTML = escapeHTML(part) + ", <span>" + escapeHTML(name) + "</span> 👋";
+})();
+
+/* ---------- Image preview ---------- */
+$("incImage").addEventListener("change", () => {
+    const f = $("incImage").files[0];
+    const img = $("imgPreview");
+    if (f) {
+        img.src = URL.createObjectURL(f);
+        img.style.display = "block";
+    } else {
+        img.style.display = "none";
+    }
+});
+
+/* ---------- Server badge ---------- */
+function setServer(online) {
+    const b = $("serverStatusBadge");
+    b.className = "badge " + (online ? "badge-online" : "badge-offline");
+    b.textContent = online ? "● Server online" : "● Server offline";
+}
+
+/* ---------- Helpers ---------- */
+function escapeHTML(str) {
+    return String(str == null ? "" : str).replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+}
+
+function locationHTML(locationStr) {
+    const raw = String(locationStr || "").trim();
+    if (!raw) return "Location not given";
+    const m = raw.match(/-?\d{1,3}\.\d+,\s*-?\d{1,3}\.\d+/);
+    if (m) {
+        const url = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(m[0]);
+        return `<a class="map-link" href="${url}" target="_blank" rel="noopener noreferrer">Open in Maps (${escapeHTML(m[0])})</a>`;
+    }
+    return escapeHTML(raw);
+}
+
+/* ---------- Load requests ---------- */
+async function loadRequests() {
+    try {
+        const response = await fetch("/api/requests?scope=all", { cache: "no-store" });
+        if (!response.ok) throw new Error("HTTP " + response.status);
+        const data = await response.json();
+
+        requestsData = Array.isArray(data) ? data : (data.requests || data.data || data.items || []);
+        setServer(true);
+        renderRequests();
+    } catch (err) {
+        console.error("Failed to load requests:", err);
+        setServer(false);
+    }
+}
+
+function renderRequests() {
+    const tbody = $("requestsTableBody");
+    const term = $("requestSearch").value.toLowerCase().trim();
+    const statusFilter = $("statusFilter").value;
+
+    const filtered = requestsData.filter(r => {
+        const bloodVal = r.blood_group || r.bloodGroup || r.blood || "";
+        const phoneVal = r.phone || r.contact || r.mobile || "";
+        const matchesTerm = !term || [
+            r.type, r.category, r.location, r.owner, r.details,
+            r.name, r.email, phoneVal, bloodVal, r.pincode, r.helper_name, r.helper_email
+        ].filter(Boolean).some(v => String(v).toLowerCase().includes(term));
+
+        const matchesStatus = statusFilter === "all" || r.status === statusFilter;
+        return matchesTerm && matchesStatus;
+    });
+
+    $("statTotal").textContent = requestsData.length;
+    $("statOpen").textContent = requestsData.filter(r => r.status === "Pending").length;
+    $("statProgress").textContent = requestsData.filter(r => r.status === "In Progress").length;
+    $("statResolved").textContent = requestsData.filter(r => r.status === "Resolved").length;
+    $("countNote").textContent = requestsData.length
+        ? `Showing ${filtered.length} of ${requestsData.length} requests — scroll inside the table to see more.`
+        : "";
+
+    if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="8" class="empty-state">No matching emergency requests found.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = filtered.map(r => {
+        const id = r.id;
+
+        const displayName = (r.name && r.name.trim()) || (r.owner && r.owner.includes("@") ? r.owner.split("@")[0] : "Community Member");
+        const displayEmail = (r.owner && r.owner.includes("@") ? r.owner : (r.email || ""));
+
+        const rawPhone = r.phone || r.contact || r.mobile;
+        const phone = (rawPhone && rawPhone !== "None" && rawPhone !== "null" && rawPhone !== "Not provided") ? rawPhone : "Not provided";
+
+        const rawBlood = r.blood_group || r.bloodGroup || r.blood || r.user_blood;
+        const hasBlood = rawBlood && rawBlood !== "N/A" && rawBlood !== "None" && rawBlood !== "null";
+        const blood = hasBlood ? `<span class="pill pill-blood">🩸 ${escapeHTML(rawBlood)}</span>` : `<span class="muted">N/A</span>`;
+
+        const pin = (r.pincode && r.pincode !== "N/A" && r.pincode !== "None") ? ` (${escapeHTML(r.pincode)})` : "";
+        const type = r.type || r.category || "Emergency";
+        const priority = r.priority || "Medium";
+        const status = r.status || "Pending";
+        const details = r.details || r.description || "—";
+        const offerStatus = r.offer_status || "";
+
+        let helperBadge = "";
+        if (r.helper_email) {
+            const hName = r.helper_name || r.helper_email.split("@")[0];
+            if (offerStatus === "Offered") {
+                helperBadge = `<div class="helper-badge">🙋 Helper Offered: ${escapeHTML(hName)} (${escapeHTML(r.helper_email)})</div>`;
+            } else if (offerStatus === "Approved") {
+                helperBadge = `<div class="pickup-note">🤝 Approved Helper: ${escapeHTML(hName)} (${escapeHTML(r.helper_email)})</div>`;
+            }
+        }
+
+        let actionBtn = "";
+        if (status === "Pending") {
+            const btnText = offerStatus === "Offered" ? "⚡ Proceed (Approve Helper)" : "⚡ Proceed";
+            actionBtn = `<button class="btn btn-proceed" onclick="proceedRequest(${id})">${btnText}</button>`;
+        } else if (status === "In Progress") {
+            actionBtn = `<button class="btn btn-resolved" onclick="resolveRequest(${id})">✓ Resolve</button>`;
+        } else {
+            actionBtn = `<span class="pill pill-done">✓ Completed</span>`;
+        }
+
+        const statusClass = "pill-status-" + String(status).replace(/\s+/g, "-");
+
+        return `
+            <tr>
+                <td class="req-id">#RL-${id}</td>
+                <td class="person">
+                    <b>${escapeHTML(displayName)}</b>
+                    ${displayEmail ? `<small style="color:var(--muted);">${escapeHTML(displayEmail)}</small><br>` : ''}
+                    <small style="color:var(--text); font-weight:600;">📞 ${escapeHTML(phone)}</small>
+                </td>
+                <td>${blood}</td>
+                <td><b>${escapeHTML(type)}</b><br><span class="pill ${escapeHTML(statusClass)}" style="margin-top:6px;">${escapeHTML(status)}</span></td>
+                <td>📍 ${locationHTML(r.location)}${pin}</td>
+                <td class="desc">${escapeHTML(details)}${helperBadge}</td>
+                <td><span class="pill pill-${escapeHTML(priority)}">${escapeHTML(priority)}</span></td>
+                <td>${actionBtn}</td>
+            </tr>
+        `;
+    }).join("");
+}
+
+/* ---------- Proceed / Resolve ---------- */
+window.proceedRequest = async function(id) {
+    try {
+        const res = await fetch(`/api/requests/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                action: "proceed",
+                volunteer_email: volunteerEmail(),
+                status: "In Progress"
+            })
+        });
+        if (!res.ok) throw new Error("Failed to update");
+        toast("Request approved and moved to In Progress.", "ok");
+        await loadRequests();
+    } catch (err) {
+        toast("Error updating request: " + err.message, "err");
+    }
+};
+
+window.resolveRequest = async function(id) {
+    try {
+        const res = await fetch(`/api/requests/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ confirmation: "Helped", status: "Resolved" })
+        });
+        if (!res.ok) throw new Error("Failed to update");
+        toast("Request marked as resolved.", "ok");
+        await loadRequests();
+    } catch (err) {
+        toast("Error resolving request: " + err.message, "err");
+    }
+};
+
+/* =====================================================
+   ITEM DONATIONS
+   ===================================================== */
+function donationStage(d) {
+    const s = String(d.status || "").toLowerCase();
+    if (s.includes("picked") || s.includes("collect") || s.includes("complete")) return "picked";
+    if (s.includes("schedul")) return "scheduled";
+    return "available";
+}
+
+const DON_ICON = { Food: "🍲", Medicine: "💊", Clothing: "🧥", Other: "📦" };
+
+async function loadDonations() {
+    try {
+        const response = await fetch("/api/donations?scope=all", { cache: "no-store" });
+        if (!response.ok) throw new Error("HTTP " + response.status);
+        const data = await response.json();
+        donationsData = Array.isArray(data) ? data : (data.donations || data.data || data.items || []);
+        donationsError = false;
+    } catch (err) {
+        console.error("Failed to load donations:", err);
+        donationsError = true;
+    }
+    renderDonations();
+}
+
+function renderDonations() {
+    const tbody = $("donationsTableBody");
+    const term = $("donationSearch").value.toLowerCase().trim();
+    const statusFilter = $("donationStatusFilter").value;
+
+    if (donationsError && !donationsData.length) {
+        $("donationCountNote").textContent = "";
+        tbody.innerHTML = `<tr><td colspan="7" class="empty-state">Unable to load donations. Check that the backend /api/donations endpoint is available.</td></tr>`;
+        return;
+    }
+
+    const filtered = donationsData.filter(d => {
+        const matchesTerm = !term || [
+            d.item_category, d.category, d.item_details, d.details, d.location,
+            d.donor_name, d.donor_email, d.email, d.phone, d.status
+        ].filter(Boolean).some(v => String(v).toLowerCase().includes(term));
+
+        const matchesStatus = statusFilter === "all" || donationStage(d) === statusFilter;
+        return matchesTerm && matchesStatus;
+    });
+
+    $("donationCountNote").textContent = donationsData.length
+        ? `Showing ${filtered.length} of ${donationsData.length} donations — scroll inside the table to see more.`
+        : "";
+
+    if (!filtered.length) {
+        tbody.innerHTML = `<tr><td colspan="7" class="empty-state">${donationsData.length ? "No matching donations found." : "No item donations have been submitted yet."}</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = filtered.slice().sort((a, b) => Number(b.id) - Number(a.id)).map(d => {
+        const id = d.id;
+        const stage = donationStage(d);
+        const category = d.item_category || d.category || "Donation";
+        const email = d.donor_email || d.email || "";
+        const name = (d.donor_name && String(d.donor_name).trim()) || (email.includes("@") ? email.split("@")[0] : "Community Donor");
+        const rawPhone = d.phone || d.contact || d.mobile;
+        const phone = (rawPhone && rawPhone !== "None" && rawPhone !== "null" && rawPhone !== "Not provided") ? rawPhone : "Not provided";
+        const details = d.item_details || d.details || "—";
+
+        const stageLabel = { available: "Awaiting Pickup", scheduled: "Pickup Scheduled", picked: "Picked" }[stage];
+
+        let actionBtn = "";
+        if (stage === "available") {
+            actionBtn = `<button class="btn btn-schedule" onclick="openSchedule(${id})">📦 Schedule Pickup</button>`;
+        } else if (stage === "scheduled") {
+            actionBtn = `<button class="btn btn-resolved" onclick="markPickedUp(${id})">✓ Mark Picked Up</button>`;
+        } else {
+            actionBtn = `<span class="pill pill-done">✓ Picked</span>`;
+        }
+
+        const note = d.pickup_message
+            ? `<div class="pickup-note">💬 ${escapeHTML(d.pickup_message)}${d.assigned_volunteer ? `<br><small>Volunteer: ${escapeHTML(d.assigned_volunteer)}</small>` : ""}</div>`
+            : "";
+
+        return `
+            <tr>
+                <td class="req-id">#DN-${escapeHTML(id)}</td>
+                <td class="person">
+                    <b>${escapeHTML(name)}</b>
+                    ${email ? `<small style="color:var(--muted);">${escapeHTML(email)}</small><br>` : ""}
+                    <small style="color:var(--text); font-weight:600;">📞 ${escapeHTML(phone)}</small>
+                </td>
+                <td><b>${DON_ICON[category] || "🎁"} ${escapeHTML(category)}</b></td>
+                <td class="desc">${escapeHTML(details)}${note}</td>
+                <td>📍 ${locationHTML(d.location)}</td>
+                <td><span class="pill pill-don-${stage}">${stageLabel}</span></td>
+                <td>${actionBtn}</td>
+            </tr>
+        `;
+    }).join("");
+}
+
+/* ---------- Schedule pickup modal ---------- */
+function openModal(id) { $(id).classList.add("active"); $(id).setAttribute("aria-hidden", "false"); }
+function closeModal(id) { $(id).classList.remove("active"); $(id).setAttribute("aria-hidden", "true"); }
+
+window.openSchedule = function(id) {
+    const d = donationsData.find(x => String(x.id) === String(id));
+    if (!d) { toast("Donation not found. Please refresh.", "err"); return; }
+    scheduleTargetId = id;
+    const email = d.donor_email || d.email || "";
+    const name = d.donor_name || (email ? email.split("@")[0] : "Donor");
+    $("scheduleDonor").textContent = `${name}${email ? " · " + email : ""}`;
+    $("scheduleVolunteer").value = volunteerName();
+    $("scheduleMessage").value = "";
+    openModal("scheduleModal");
+    setTimeout(() => $("scheduleMessage").focus(), 50);
+};
+
+function closeSchedule() { closeModal("scheduleModal"); scheduleTargetId = null; }
+$("scheduleClose").addEventListener("click", closeSchedule);
+$("scheduleCancel").addEventListener("click", closeSchedule);
+$("scheduleModal").addEventListener("click", e => { if (e.target === $("scheduleModal")) closeSchedule(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeSchedule(); });
+
+$("scheduleForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    if (scheduleTargetId == null) return;
+
+    const message = $("scheduleMessage").value.trim();
+    const volunteer = $("scheduleVolunteer").value.trim() || volunteerName();
+    if (!message) { toast("Please write a pickup message.", "err"); return; }
+
+    const btn = $("scheduleSubmit");
+    const original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = "Sending...";
+
+    try {
+        const res = await fetch(`/api/donations/${encodeURIComponent(scheduleTargetId)}/schedule`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                pickup_message: message,
+                assigned_volunteer: volunteer,
+                volunteer_email: volunteerEmail() || volunteer,
+                status: "Scheduled"
+            })
+        });
+        let data = {};
+        try { data = await res.json(); } catch (err) { data = {}; }
+        if (!res.ok) throw new Error(data.error || data.message || ("HTTP " + res.status));
+
+        let msg = data.message || "Pickup scheduled. The donor can now see your message.";
+        if (data.email_sent === true) msg += " The donor was also emailed.";
+        else if (data.email_sent === false) msg += " The email could not be sent.";
+        toast(msg, "ok");
+        closeSchedule();
+        await loadDonations();
+    } catch (err) {
+        toast("Could not schedule pickup: " + err.message, "err");
+    } finally {
+        btn.disabled = false;
+        btn.textContent = original;
+    }
+});
+
+window.markPickedUp = async function(id) {
+    try {
+        const res = await fetch(`/api/donations/${encodeURIComponent(id)}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: "Picked" })
+        });
+        let data = {};
+        try { data = await res.json(); } catch (err) { data = {}; }
+        if (!res.ok) throw new Error(data.error || data.message || ("HTTP " + res.status));
+        toast("Donation marked as picked. Thank you!", "ok");
+        await loadDonations();
+    } catch (err) {
+        toast("Error updating donation: " + err.message, "err");
+    }
+};
+
+/* ---------- Post Community Incident Alert ---------- */
+$("incidentForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const btn = $("postIncidentBtn");
+    btn.disabled = true;
+    btn.textContent = "Publishing...";
+
+    const formData = new FormData();
+    formData.append("category", $("incCategory").value);
+    formData.append("title", $("incCategory").value);
+    formData.append("location", $("incLocation").value);
+    formData.append("description", $("incDescription").value);
+    formData.append("posted_by", "Volunteer Coordinator");
+
+    const imgFile = $("incImage").files[0];
+    if (imgFile) {
+        formData.append("image", imgFile);
+    }
+
+    try {
+        const res = await fetch("/api/incidents", {
+            method: "POST",
+            body: formData
+        });
+        const resData = await res.json();
+        if (!res.ok) throw new Error(resData.message || resData.error || "Failed to publish alert");
+        toast("Alert published! It is now visible on the User Dashboard.", "ok");
+        $("incidentForm").reset();
+        $("imgPreview").style.display = "none";
+    } catch (err) {
+        toast("Alert post failed: " + err.message, "err");
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "📢 Publish Alert";
+    }
+});
+
+/* ---------- Events + boot ---------- */
+$("requestSearch").addEventListener("input", renderRequests);
+$("statusFilter").addEventListener("change", renderRequests);
+$("refreshRequestsBtn").addEventListener("click", loadRequests);
+
+$("donationSearch").addEventListener("input", renderDonations);
+$("donationStatusFilter").addEventListener("change", renderDonations);
+$("refreshDonationsBtn").addEventListener("click", async () => {
+    const b = $("refreshDonationsBtn");
+    b.disabled = true;
+    await loadDonations();
+    b.disabled = false;
+    toast("Donations refreshed.", "ok");
+});
+
+loadRequests();
+loadDonations();
+setInterval(() => {
+    if (document.hidden) return;
+    loadRequests();
+    loadDonations();
+}, 10000);
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+﻿.env
+*.env
+*.pem
+*.db
+*.sqlite3
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+backend/uploads/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <title>ReliefLink | Sign In</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #092d46;
+            --teal: #079b91;
+            --muted: #7b8fa2;
+            --border: #dce5ec;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 20px;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            color: #183650;
+            background:
+                radial-gradient(circle at 8% 10%, rgba(32,212,197,.28), transparent 40%),
+                radial-gradient(circle at 92% 90%, rgba(40,119,219,.22), transparent 40%),
+                linear-gradient(135deg,#e8f6f7,#f4f8fc 55%,#e9f1ff);
+        }
+
+        button, input, select {
+            font: inherit;
+        }
+
+        .login-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            width: min(100%, 960px);
+            min-height: 560px;
+            overflow: hidden;
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 30px 80px rgba(9,45,70,.18);
+        }
+
+        .login-hero {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 40px;
+            color: white;
+            background:
+                linear-gradient(160deg,rgba(5,40,62,.94),rgba(5,110,111,.85)),
+                url('https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&w=1000&q=85') center/cover;
+        }
+
+        .rl-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .rl-emblem {
+            width: 52px;
+            height: 52px;
+        }
+
+        .rl-wordmark {
+            font-size: 30px;
+            font-weight: 800;
+            letter-spacing: -.6px;
+        }
+
+        .rl-wordmark span {
+            color: #3de0c8;
+        }
+
+        .rl-tagline {
+            color: #c6e3ed;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1.4px;
+        }
+
+        .hero-message h1 {
+            color: white;
+            font-size: clamp(30px,3.6vw,42px);
+            line-height: 1.15;
+            margin-bottom: 16px;
+        }
+
+        .hero-message h1 span {
+            color: #3de0c8;
+        }
+
+        .hero-message p {
+            color: #e0eff4;
+            font-size: 13px;
+            line-height: 1.85;
+        }
+
+        .hero-footer {
+            color: #d0e8ee;
+            font-size: 11px;
+        }
+
+        .login-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+            animation: fadeIn .25s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        .login-symbol {
+            width: 54px;
+            height: 54px;
+            display: grid;
+            place-items: center;
+            border-radius: 17px;
+            background: linear-gradient(135deg,#e0f8f3,#c9f1ea);
+            color: #078e86;
+            font-size: 26px;
+            margin-bottom: 18px;
+        }
+
+        .login-content h2 {
+            margin: 0 0 8px;
+            font-size: 27px;
+            font-weight: 800;
+            color: var(--navy);
+        }
+
+        .intro {
+            color: var(--muted);
+            font-size: 12.5px;
+            line-height: 1.8;
+            margin-bottom: 24px;
+        }
+
+        .field {
+            margin-bottom: 16px;
+        }
+
+        .field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .field label {
+            display: block;
+            margin-bottom: 7px;
+            color: #34516b;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .field input,
+        .field select {
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            background: #fbfdff;
+            font-size: 13px;
+            color: #29445d;
+            outline: none;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            border-color: var(--teal);
+            box-shadow: 0 0 0 4px rgba(7,155,145,.12);
+        }
+
+        .login-button {
+            width: 100%;
+            margin-top: 6px;
+            padding: 14px;
+            border: none;
+            border-radius: 11px;
+            background: linear-gradient(90deg,#08b8a5,#078e91);
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .login-button:hover {
+            opacity: .9;
+        }
+
+        .login-button:disabled {
+            opacity: .65;
+            cursor: not-allowed;
+        }
+
+        .login-message {
+            display: none;
+            margin-top: 15px;
+            padding: 11px 13px;
+            border-radius: 9px;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .login-message.error {
+            display: block;
+            background: #fff0f0;
+            color: #b42318;
+        }
+
+        .login-message.success {
+            display: block;
+            background: #eafaf4;
+            color: #06776f;
+        }
+
+        .create-account {
+            margin-top: 22px;
+            text-align: center;
+            color: #8799a9;
+            font-size: 12.5px;
+        }
+
+        .create-account a,
+        .back-link {
+            color: #078e86;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .secure-note {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 10px;
+            color: #7890a2;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 14px;
+            font-size: 12px;
+        }
+
+        @media(max-width:760px) {
+            body {
+                padding: 12px;
+            }
+
+            .login-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .login-hero {
+                min-height: 210px;
+                padding: 25px;
+            }
+
+            .hero-message h1 {
+                font-size: 27px;
+            }
+
+            .hero-footer {
+                display: none;
+            }
+
+            .login-content {
+                padding: 28px 22px;
+            }
+
+            .field-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<main class="login-layout">
+
+    <!-- LEFT SIDE -->
+    <section class="login-hero">
+
+        <div class="rl-brand">
+
+            <svg class="rl-emblem"
+                 viewBox="0 0 48 48"
+                 xmlns="http://www.w3.org/2000/svg"
+                 aria-hidden="true">
+
+                <path fill="#3de0c8"
+                      d="M24 43C8 31 3 22 3 14.5 3 8.7 7.6 4.5 13 4.5c4.4 0 8.4 2.5 11 6.6 2.6-4.1 6.6-6.6 11-6.6 5.4 0 10 4.2 10 10 0 7.5-5 16.5-21 28.5z"/>
+
+                <rect x="21.8" y="13" width="4.4" height="16" rx="2.2" fill="#fff"/>
+                <rect x="16" y="18.8" width="16" height="4.4" rx="2.2" fill="#fff"/>
+
+            </svg>
+
+            <div>
+                <div class="rl-wordmark">Relief<span>Link</span></div>
+                <div class="rl-tagline">
+                    COMMUNITY EMERGENCY RESOURCE PLATFORM
+                </div>
+            </div>
+
+        </div>
+
+        <div class="hero-message">
+
+            <h1>
+                Together, we make
+                <span>communities stronger.</span>
+            </h1>
+
+            <p>
+                Connect people who need help with a community ready
+                to support them. Every action matters.
+            </p>
+
+        </div>
+
+        <div class="hero-footer">
+            ♥ Community support · Emergency assistance · Hope for everyone
+        </div>
+
+    </section>
+
+
+    <!-- RIGHT SIDE -->
+    <section class="login-content">
+
+        <!-- LOGIN VIEW -->
+        <div class="view active" id="loginView">
+
+            <div class="login-symbol">♥</div>
+
+            <h2>Welcome to ReliefLink</h2>
+
+            <p class="intro">
+                Sign in to continue to your community support dashboard.
+            </p>
+
+            <form id="loginForm">
+
+                <div class="field">
+
+                    <label for="role">Sign in as</label>
+
+                    <select id="role" name="role" required>
+
+                        <option value="">Choose your role</option>
+                        <option value="user">Community User</option>
+                        <option value="volunteer">Volunteer</option>
+                        <option value="admin">Administrator</option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label for="email">Email address</label>
+
+                    <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        placeholder="you@example.com"
+                        autocomplete="username"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="field">
+
+                    <label for="password">Password</label>
+
+                    <input
+                        id="password"
+                        name="password"
+                        type="password"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                </div>
+
+
+                <button
+                    class="login-button"
+                    id="loginButton"
+                    type="submit">
+
+                    Sign In →
+
+                </button>
+
+
+                <div
+                    id="loginMessage"
+                    class="login-message"
+                    role="status"
+                    aria-live="polite">
+                </div>
+
+            </form>
+
+
+            <p class="create-account">
+
+                New to ReliefLink?
+
+                <a href="#register" id="showRegister">
+                    Create an account
+                </a>
+
+            </p>
+
+
+            <div class="secure-note">
+                ♥ ReliefLink — Supporting communities together
+            </div>
+
+        </div>
+
+
+        <!-- REGISTRATION VIEW -->
+        <div class="view" id="registerView">
+
+            <a href="#login" class="back-link" id="backToLogin">
+                ← Back to sign in
+            </a>
+
+            <div class="login-symbol">♥</div>
+
+            <h2>Create your account</h2>
+
+            <p class="intro">
+                Join ReliefLink to request help or support your community.
+            </p>
+
+
+            <form id="registerForm">
+
+                <div class="field">
+
+                    <label for="regName">Full name</label>
+
+                    <input
+                        id="regName"
+                        name="name"
+                        type="text"
+                        placeholder="Your full name"
+                        autocomplete="name"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="field">
+
+                    <label for="regEmail">Email address</label>
+
+                    <input
+                        id="regEmail"
+                        name="email"
+                        type="email"
+                        placeholder="you@example.com"
+                        autocomplete="email"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="field-row">
+
+                    <div class="field">
+
+                        <label for="regBlood">Blood group</label>
+
+                        <select id="regBlood" name="blood" required>
+
+                            <option value="">Select blood group</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label for="regPincode">Pincode</label>
+
+                        <input
+                            id="regPincode"
+                            name="pincode"
+                            type="text"
+                            placeholder="6-digit pincode"
+                            inputmode="numeric"
+                            maxlength="6"
+                            pattern="[0-9]{6}"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <div class="field">
+
+                    <label for="regPhone">Mobile number</label>
+
+                    <input
+                        id="regPhone"
+                        name="phone"
+                        type="tel"
+                        placeholder="10-digit mobile number"
+                        inputmode="numeric"
+                        maxlength="10"
+                        pattern="[0-9]{10}"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="field-row">
+
+                    <div class="field">
+
+                        <label for="regPassword">Password</label>
+
+                        <input
+                            id="regPassword"
+                            name="password"
+                            type="password"
+                            placeholder="At least 8 characters"
+                            minlength="8"
+                            autocomplete="new-password"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label for="regConfirm">Confirm password</label>
+
+                        <input
+                            id="regConfirm"
+                            name="confirm"
+                            type="password"
+                            placeholder="Repeat password"
+                            minlength="8"
+                            autocomplete="new-password"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    class="login-button"
+                    id="registerButton"
+                    type="submit">
+
+                    Create Account →
+
+                </button>
+
+
+                <div
+                    id="registerMessage"
+                    class="login-message"
+                    role="status"
+                    aria-live="polite">
+                </div>
+
+            </form>
+
+
+            <p class="create-account">
+
+                Already have an account?
+
+                <a href="#login" id="showLogin">
+                    Sign in
+                </a>
+
+            </p>
+
+
+            <div class="secure-note">
+                ♥ ReliefLink — Supporting communities together
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+<script>
+"use strict";
+
+const loginView = document.getElementById("loginView");
+const registerView = document.getElementById("registerView");
+const showRegister = document.getElementById("showRegister");
+const showLogin = document.getElementById("showLogin");
+const backToLogin = document.getElementById("backToLogin");
+
+const loginForm = document.getElementById("loginForm");
+const loginButton = document.getElementById("loginButton");
+const loginMessage = document.getElementById("loginMessage");
+
+const registerForm = document.getElementById("registerForm");
+const registerButton = document.getElementById("registerButton");
+const registerMessage = document.getElementById("registerMessage");
+
+function showView(view) {
+    if (view === "register") {
+        loginView.classList.remove("active");
+        registerView.classList.add("active");
+    } else {
+        registerView.classList.remove("active");
+        loginView.classList.add("active");
+    }
+    clearMessages();
+}
+
+showRegister.addEventListener("click", (e) => { e.preventDefault(); showView("register"); });
+showLogin.addEventListener("click", (e) => { e.preventDefault(); showView("login"); });
+backToLogin.addEventListener("click", (e) => { e.preventDefault(); showView("login"); });
+
+function setMessage(el, text, isError = true) {
+    el.textContent = text;
+    el.className = "login-message " + (isError ? "error" : "success");
+    el.style.display = "block";
+}
+
+function clearMessages() {
+    loginMessage.style.display = "none";
+    loginMessage.textContent = "";
+    registerMessage.style.display = "none";
+    registerMessage.textContent = "";
+}
+
+async function safeApiPost(endpoint, payload) {
+    const response = await fetch(endpoint, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+        },
+        body: JSON.stringify(payload)
+    });
+
+    const rawText = await response.text();
+    let data = {};
+    if (rawText && rawText.trim().length > 0) {
+        try {
+            data = JSON.parse(rawText);
+        } catch (e) {
+            console.error("Non-JSON Server Output:", rawText);
+            throw new Error(`Server returned status ${response.status} with unexpected content format.`);
+        }
+    }
+
+    if (!response.ok || data.success === false) {
+        throw new Error(data.error || data.message || `Request failed (${response.status})`);
+    }
+
+    return data;
+}
+
+loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearMessages();
+
+    const role = document.getElementById("role").value;
+    const email = document.getElementById("email").value.trim().toLowerCase();
+    const password = document.getElementById("password").value;
+
+    if (!role || !email || !password) {
+        setMessage(loginMessage, "Please fill in all fields.");
+        return;
+    }
+
+    loginButton.disabled = true;
+    loginButton.textContent = "Signing In...";
+
+    try {
+        const data = await safeApiPost("/api/login", { email, password, role });
+
+        setMessage(loginMessage, "Login successful. Redirecting...", false);
+
+        const userData = data.user || { email, role };
+        localStorage.setItem("rl_session", JSON.stringify(userData));
+
+        setTimeout(() => {
+            const userRole = (userData.role || role).toLowerCase();
+            if (userRole === "admin") {
+                window.location.href = "admin-dashboard.html";
+            } else if (userRole === "volunteer") {
+                window.location.href = "volunteer-dashboard.html";
+            } else {
+                window.location.href = "user-dashboard.html";
+            }
+        }, 600);
+
+    } catch (err) {
+        localStorage.removeItem("rl_session");
+        setMessage(loginMessage, err.message);
+        loginButton.disabled = false;
+        loginButton.textContent = "Sign In →";
+    }
+});
+
+registerForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearMessages();
+
+    const name = document.getElementById("regName").value.trim();
+    const email = document.getElementById("regEmail").value.trim().toLowerCase();
+    const bloodGroup = document.getElementById("regBlood").value;
+    const pincode = document.getElementById("regPincode").value.trim();
+    const phone = document.getElementById("regPhone").value.trim();
+    const password = document.getElementById("regPassword").value;
+    const confirm = document.getElementById("regConfirm").value;
+
+    if (password !== confirm) {
+        setMessage(registerMessage, "Passwords do not match.");
+        return;
+    }
+
+    if (password.length < 8) {
+        setMessage(registerMessage, "Password must be at least 8 characters.");
+        return;
+    }
+
+    registerButton.disabled = true;
+    registerButton.textContent = "Creating Account...";
+
+    try {
+        const payload = {
+            name,
+            email,
+            password,
+            phone,
+            bloodGroup,
+            blood_group: bloodGroup,
+            pincode
+        };
+
+        await safeApiPost("/api/register", payload);
+
+        setMessage(registerMessage, "Account created successfully! Redirecting to sign in...", false);
+        registerForm.reset();
+
+        setTimeout(() => {
+            showView("login");
+            document.getElementById("email").value = email;
+            document.getElementById("role").value = "user";
+            registerButton.disabled = false;
+            registerButton.textContent = "Create Account →";
+        }, 1200);
+
+    } catch (err) {
+        setMessage(registerMessage, err.message);
+        registerButton.disabled = false;
+        registerButton.textContent = "Create Account →";
+    }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,2064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReliefLink | User Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+/* apply saved theme before paint (no flash) */
+try { document.documentElement.setAttribute("data-theme", localStorage.getItem("rl_theme") || "light"); } catch (e) {}
+</script>
+
+<style>
+:root {
+    --navy:#092d46; --teal:#079b91; --teal2:#0cb8a7;
+    --bg:#eef4f9; --surface:#ffffff; --surface2:#f5f9fc; --input:#fbfdff;
+    --text:#183650; --heading:#092d46; --muted:#72869b; --border:#e3edf5;
+    --glass:rgba(255,255,255,.82);
+    --shadow:0 6px 22px rgba(9,45,70,.07);
+    --sb-w:256px;
+}
+[data-theme="dark"] {
+    --bg:#08141d; --surface:#0f2330; --surface2:#143040; --input:#0c1d28;
+    --text:#d7e6ef; --heading:#eaf5fa; --muted:#88a2b3; --border:#1d3a4b;
+    --glass:rgba(15,35,48,.82);
+    --shadow:0 6px 22px rgba(0,0,0,.35);
+}
+* { box-sizing:border-box; }
+
+html { scroll-behavior:smooth; }
+body {
+    margin:0; font-family:Inter,sans-serif; color:var(--text);
+    background:radial-gradient(circle at top left,rgba(12,184,167,.10) 0,transparent 35%),
+               radial-gradient(circle at bottom right,rgba(40,119,219,.10) 0,transparent 35%), var(--bg);
+    background-attachment:fixed; transition:background .3s,color .3s;
+}
+button,input,select,textarea { font:inherit; color:inherit; }
+button { cursor:pointer; }
+a { color:inherit; }
+
+/* ================= LAYOUT ================= */
+.app { display:flex; min-height:100vh; }
+.main { flex:1; min-width:0; margin-left:var(--sb-w); }
+.content { max-width:1400px; margin:auto; padding:24px 28px 90px; }
+
+.offline { display:none; padding:10px 16px; background:#e5543a; color:#fff; font-size:12.5px; font-weight:700; text-align:center; }
+.offline.show { display:block; }
+
+/* ================= SIDEBAR ================= */
+.sidebar {
+    position:fixed; left:0; top:0; bottom:0; width:var(--sb-w); z-index:60;
+    display:flex; flex-direction:column; gap:6px; padding:20px 14px 16px; color:#fff; overflow-y:auto;
+    background:radial-gradient(circle at 0 0,rgba(32,212,197,.25),transparent 45%),
+               linear-gradient(180deg,#06243a,#08425a 62%,#07697a);
+    box-shadow:8px 0 30px rgba(6,36,58,.25); transition:transform .3s ease;
+}
+.sb-brand { display:flex; align-items:center; gap:11px; padding:4px 8px 18px; margin-bottom:6px; border-bottom:1px solid rgba(255,255,255,.14); }
+.sb-brand svg { width:46px; height:46px; flex-shrink:0; filter:drop-shadow(0 6px 12px rgba(0,0,0,.3)); }
+.sb-brand b {
+    display:block; font-size:23px; font-weight:800; letter-spacing:-.6px; line-height:1.1;
+    background:linear-gradient(90deg,#fff,#b9fff6 60%,#ffe3a6); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+}
+.sb-brand small { display:flex; align-items:center; gap:6px; margin-top:4px; font-size:8.5px; font-weight:700; letter-spacing:1.6px; text-transform:uppercase; color:#b9e3ea; }
+.sb-brand small::before { content:""; width:7px; height:7px; border-radius:50%; background:#3dffb0; animation:liveDot 1.8s infinite; }
+@keyframes liveDot {
+    0% { box-shadow:0 0 0 0 rgba(61,255,176,.7); }
+    70% { box-shadow:0 0 0 8px rgba(61,255,176,0); }
+    100% { box-shadow:0 0 0 0 rgba(61,255,176,0); }
+}
+.sb-label { margin:10px 10px 4px; font-size:10px; font-weight:800; letter-spacing:1.8px; color:#7fb8c4; }
+.sb-link {
+    position:relative; display:flex; align-items:center; gap:12px; width:100%; padding:12px 14px;
+    border:0; border-radius:13px; background:transparent; color:#cfe9ee; font-size:13.5px; font-weight:600; text-align:left; transition:.2s;
+}
+.sb-link .ic { width:30px; height:30px; display:grid; place-items:center; border-radius:9px; background:rgba(255,255,255,.08); font-size:16px; transition:.2s; }
+.sb-link:hover { background:rgba(255,255,255,.1); color:#fff; transform:translateX(3px); }
+.sb-link.active { color:#fff; background:linear-gradient(90deg,rgba(32,212,197,.30),rgba(255,255,255,.07)); box-shadow:inset 3px 0 0 #20d4c5; }
+.sb-link.active .ic { background:linear-gradient(135deg,#20d4c5,#079b91); box-shadow:0 6px 14px rgba(32,212,197,.35); }
+.sb-badge { margin-left:auto; min-width:22px; padding:2px 8px; border-radius:20px; background:rgba(255,255,255,.16); color:#fff; font-size:10.5px; font-weight:800; text-align:center; }
+.sb-volunteer {
+    display:flex; align-items:center; justify-content:center; gap:8px; margin:14px 4px 0; padding:13px; border-radius:13px; text-decoration:none;
+    color:#06243a; font-size:12.5px; font-weight:800; background:linear-gradient(90deg,#ffd98a,#ffb85c); box-shadow:0 8px 18px rgba(255,184,92,.35); transition:.2s;
+}
+.sb-volunteer:hover { transform:translateY(-2px); box-shadow:0 12px 24px rgba(255,184,92,.45); }
+.sb-spacer { flex:1; min-height:14px; }
+.sb-user { display:flex; align-items:center; gap:10px; padding:10px; border-radius:14px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.16); cursor:pointer; transition:.2s; }
+.sb-user:hover { background:rgba(255,255,255,.17); }
+.avatar { position:relative; width:42px; height:42px; flex-shrink:0; border-radius:50%; overflow:hidden; display:grid; place-items:center; background:#0e4a63; border:2px solid #20d4c5; font-weight:800; font-size:17px; color:#fff; }
+.avatar img { width:100%; height:100%; object-fit:cover; display:none; }
+.avatar:hover::after { content:"📷"; position:absolute; inset:0; display:grid; place-items:center; background:rgba(0,0,0,.55); font-size:15px; }
+.sb-user .meta { min-width:0; line-height:1.25; }
+.sb-user .meta strong { display:block; font-size:13px; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.sb-user .meta small { display:block; font-size:10.5px; color:#b9e3ea; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.sb-logout { display:flex; align-items:center; justify-content:center; gap:8px; margin-top:8px; padding:11px; border-radius:12px; text-decoration:none; color:#fff; font-size:12.5px; font-weight:700; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.18); transition:.25s; }
+.sb-logout:hover { background:linear-gradient(90deg,#e5543a,#f0793a); border-color:transparent; }
+.scrim { display:none; position:fixed; inset:0; z-index:55; background:rgba(6,36,58,.55); backdrop-filter:blur(3px); }
+
+/* ================= TOPBAR ================= */
+.topbar {
+    position:sticky; top:0; z-index:40; display:flex; align-items:center; gap:14px; padding:14px 28px;
+    background:var(--glass); backdrop-filter:blur(14px); border-bottom:1px solid var(--border);
+}
+.menu-btn { display:none; }
+.tb-title h1 { margin:0; font-size:21px; font-weight:800; letter-spacing:-.4px; color:var(--heading); }
+.tb-title p { margin:2px 0 0; font-size:12px; color:var(--muted); }
+.tb-actions { margin-left:auto; display:flex; align-items:center; gap:10px; }
+.rl-clock { text-align:right; line-height:1.2; margin-right:6px; }
+.rl-clock strong { display:block; font-size:16px; font-weight:800; color:var(--heading); }
+.rl-clock span { font-size:10.5px; color:var(--muted); font-weight:600; }
+.icon-btn { position:relative; width:42px; height:42px; display:grid; place-items:center; border:1px solid var(--border); border-radius:12px; background:var(--surface); font-size:18px; transition:.2s; box-shadow:var(--shadow); }
+.icon-btn:hover { transform:translateY(-2px); border-color:var(--teal); }
+.bell-dot { position:absolute; top:-6px; right:-6px; min-width:19px; height:19px; padding:0 5px; display:none; place-items:center; border-radius:20px; background:#e5543a; color:#fff; font-size:10px; font-weight:800; border:2px solid var(--surface); }
+.bell-dot.show { display:grid; }
+.sos-btn { display:inline-flex; align-items:center; gap:8px; padding:11px 18px; border-radius:30px; text-decoration:none; color:#fff; font-size:13px; font-weight:800; background:linear-gradient(90deg,#e5322a,#f0793a); animation:sosPulse 2.2s infinite; }
+@keyframes sosPulse {
+    0% { box-shadow:0 8px 20px rgba(229,50,42,.4),0 0 0 0 rgba(229,50,42,.5); }
+    70% { box-shadow:0 8px 20px rgba(229,50,42,.4),0 0 0 14px rgba(229,50,42,0); }
+    100% { box-shadow:0 8px 20px rgba(229,50,42,.4),0 0 0 0 rgba(229,50,42,0); }
+}
+.bell-wrap { position:relative; }
+.notif-pop { display:none; position:absolute; right:0; top:52px; width:340px; max-width:86vw; padding:12px; border-radius:16px; background:var(--surface); border:1px solid var(--border); box-shadow:0 20px 44px rgba(9,45,70,.22); z-index:70; }
+.notif-pop.open { display:block; animation:pop .2s ease; }
+@keyframes pop { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+.notif-pop h4 { margin:2px 6px 10px; font-size:13px; color:var(--heading); }
+.notif-item { display:flex; gap:10px; width:100%; padding:10px; border:0; border-radius:11px; background:transparent; text-align:left; font-size:12px; line-height:1.5; color:var(--text); transition:.15s; }
+.notif-item:hover { background:var(--surface2); }
+.notif-item .ni { width:32px; height:32px; flex-shrink:0; display:grid; place-items:center; border-radius:10px; background:var(--surface2); font-size:15px; }
+.notif-empty { padding:18px; text-align:center; font-size:12px; color:var(--muted); }
+
+/* ================= VIEWS ================= */
+.view { display:none; }
+.view.active { display:block; animation:viewIn .35s ease; }
+@keyframes viewIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+.grid-2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-items:stretch; }
+.grid-3 { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+
+.card { min-width:0; padding:20px; background:var(--surface); border:1px solid var(--border); border-radius:18px; box-shadow:var(--shadow); transition:background .3s,border-color .3s; }
+.card-head { display:flex; align-items:center; gap:13px; margin-bottom:16px; padding-bottom:14px; border-bottom:2px solid var(--border); }
+.card-head .grow { flex:1; min-width:0; }
+.card-head h2 { margin:0; font-size:17px; font-weight:800; letter-spacing:-.3px; color:var(--heading); line-height:1.25; }
+.card-head p { margin:4px 0 0; font-size:12px; color:var(--muted); line-height:1.5; }
+.h-ico { width:44px; height:44px; flex-shrink:0; display:grid; place-items:center; border-radius:14px; color:#fff; font-size:20px; background:linear-gradient(135deg,#0cb8a7,#078e91); box-shadow:0 8px 16px rgba(7,155,145,.28); }
+.h-ico.blue { background:linear-gradient(135deg,#4a95f0,#2877db); box-shadow:0 8px 16px rgba(40,119,219,.28); }
+.h-ico.amber { background:linear-gradient(135deg,#f5b04a,#e58a20); box-shadow:0 8px 16px rgba(229,138,32,.28); }
+.h-ico.red { background:linear-gradient(135deg,#f0793a,#e5543a); box-shadow:0 8px 16px rgba(229,84,58,.28); }
+
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 18px; border:0; border-radius:11px; text-decoration:none; color:#fff; font-size:12.5px; font-weight:700; background:linear-gradient(90deg,#08b8a5,#078e91); box-shadow:0 6px 14px rgba(7,155,145,.28); transition:.2s; }
+.btn:hover { transform:translateY(-2px); box-shadow:0 10px 20px rgba(7,155,145,.35); }
+.btn:disabled { opacity:.6; cursor:wait; transform:none; }
+.btn.block { width:100%; padding:14px; }
+.small-btn { padding:8px 12px; border:1px solid var(--border); border-radius:10px; background:var(--surface); color:var(--text); font-size:11.5px; font-weight:700; transition:.2s; }
+.small-btn:hover { border-color:var(--teal); color:var(--teal); }
+.small-btn:disabled { opacity:.6; }
+
+.empty { padding:22px; border:1px dashed var(--border); border-radius:12px; color:var(--muted); font-size:12.5px; line-height:1.7; text-align:center; }
+.greet { margin-bottom:18px; }
+.greet h2 { margin:0; font-size:26px; font-weight:800; letter-spacing:-.6px; color:var(--heading); }
+.greet p { margin:5px 0 0; font-size:13px; color:var(--muted); }
+
+/* ================= HERO ================= */
+.hero { position:relative; overflow:hidden; padding:34px 44px 56px; border-radius:22px; color:#fff; background:#06243a; box-shadow:0 14px 36px rgba(9,45,70,.2); }
+.hero::after { content:""; position:absolute; right:-80px; top:-80px; width:300px; height:300px; border-radius:50%; background:radial-gradient(circle,rgba(32,212,197,.28),transparent 65%); pointer-events:none; }
+.hero-bgs { position:absolute; inset:0; z-index:0; }
+.hero-bg { position:absolute; inset:0; background-size:cover; background-position:center; opacity:0; transform:scale(1.06); transition:opacity 1.6s ease,transform 8s ease; }
+.hero-bg.on { opacity:1; transform:scale(1); }
+.hero-bgs::after { content:""; position:absolute; inset:0; background:linear-gradient(100deg,rgba(4,37,58,.97),rgba(5,62,78,.78),rgba(5,62,78,.18)); }
+.hero-slider { position:relative; z-index:1; height:210px; }
+.hero-slide { position:absolute; inset:0; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; opacity:0; transform:translateX(-100%); transition:transform 1.6s cubic-bezier(.65,.05,.25,1),opacity 1.6s ease; pointer-events:none; }
+.hero-slide.active { opacity:1; transform:translateX(0); pointer-events:auto; }
+.hero-slide.exit { opacity:0; transform:translateX(100%); }
+.hero-slide.no-anim { transition:none !important; }
+.hero-copy { max-width:620px; }
+.hero-tag { display:inline-flex; align-items:center; gap:8px; padding:7px 14px; margin-bottom:12px; border:1px solid rgba(107,207,198,.7); background:rgba(5,151,140,.25); backdrop-filter:blur(4px); border-radius:20px; font-size:10px; font-weight:800; letter-spacing:1.6px; }
+.hero-tag::before { content:""; width:8px; height:8px; border-radius:50%; background:#3dffb0; animation:liveDot 1.8s infinite; }
+.hero h2 { margin:0; font-size:clamp(26px,3.6vw,40px); line-height:1.13; font-weight:800; letter-spacing:-1.1px; text-shadow:0 3px 18px rgba(0,0,0,.3); }
+.hero h2 span { display:inline-block; margin-top:3px; background:linear-gradient(90deg,#20d4c5,#8ff7ec 55%,#ffd98a); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+.hero p { margin:10px 0 0; max-width:540px; color:#e0edf3; font-size:13.5px; line-height:1.7; }
+.hero-cta { position:relative; z-index:2; margin-top:14px; }
+.hero-dots { position:absolute; z-index:2; left:44px; bottom:22px; display:flex; gap:8px; }
+.hero-dots button { width:9px; height:9px; padding:0; border:0; border-radius:50%; background:rgba(255,255,255,.4); transition:.3s; }
+.hero-dots button.on { width:28px; border-radius:6px; background:#20d4c5; }
+
+/* ================= STATS ================= */
+.stats { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; margin:20px 0; }
+.stat { position:relative; overflow:hidden; display:flex; align-items:center; gap:14px; padding:18px 20px; background:var(--surface); border:1px solid var(--border); border-radius:18px; box-shadow:var(--shadow); transition:.2s; }
+.stat:hover { transform:translateY(-4px); }
+.stat::after { content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--c,#2877db); }
+.stat .si { width:50px; height:50px; flex-shrink:0; display:grid; place-items:center; border-radius:15px; font-size:22px; color:var(--c); background:color-mix(in srgb,var(--c) 14%,transparent); }
+.stat small { display:block; font-size:12px; font-weight:600; color:var(--muted); }
+.stat b { display:block; margin-top:2px; font-size:28px; font-weight:800; line-height:1.1; color:var(--heading); }
+
+/* ================= QUICK ACTIONS ================= */
+.qa-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; margin-bottom:20px; }
+.qa { position:relative; overflow:hidden; display:flex; flex-direction:column; align-items:flex-start; gap:6px; padding:18px; text-align:left; text-decoration:none; border:1px solid var(--border); border-radius:18px; background:var(--surface); box-shadow:var(--shadow); transition:.25s; }
+.qa::before { content:""; position:absolute; right:-30px; top:-30px; width:110px; height:110px; border-radius:50%; background:var(--c); opacity:.10; transition:.3s; }
+.qa:hover { transform:translateY(-5px); border-color:var(--c); box-shadow:0 16px 30px color-mix(in srgb,var(--c) 22%,transparent); }
+.qa:hover::before { transform:scale(1.6); opacity:.16; }
+.qa .qi { width:46px; height:46px; display:grid; place-items:center; border-radius:14px; font-size:22px; color:#fff; background:var(--c); box-shadow:0 8px 16px color-mix(in srgb,var(--c) 40%,transparent); }
+.qa strong { margin-top:6px; font-size:14.5px; color:var(--heading); }
+.qa span.d { font-size:11.5px; line-height:1.5; color:var(--muted); }
+.qa .go { margin-top:4px; font-size:11.5px; font-weight:800; color:var(--c); }
+
+/* ================= HELPLINES ================= */
+.hl-strip { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:10px; }
+.hl { display:flex; flex-direction:column; align-items:center; gap:2px; padding:12px 6px; text-align:center; text-decoration:none; background:var(--surface); border:1px solid var(--border); border-radius:14px; transition:.2s; }
+.hl:hover { transform:translateY(-3px); border-color:#e5543a; box-shadow:0 10px 22px rgba(229,84,58,.18); }
+.hl .i { font-size:20px; }
+.hl .n { font-size:19px; font-weight:800; color:#e5543a; }
+.hl .t { font-size:10.5px; font-weight:700; color:var(--muted); }
+.hl.big { padding:22px 10px; }
+.hl.big .i { font-size:30px; }
+.hl.big .n { font-size:28px; }
+.hl.big .t { font-size:12px; }
+
+/* ================= FORMS ================= */
+.field { margin-bottom:14px; min-width:0; }
+.field > label,.lbl { display:block; margin-bottom:7px; font-size:11.5px; font-weight:700; color:var(--heading); }
+.req { color:#e45858; }
+.field input:not([type=hidden]):not([type=checkbox]),.field select,.field textarea { width:100%; padding:12px 13px; border:1px solid var(--border); border-radius:11px; background:var(--input); color:var(--text); font-size:13px; outline:none; transition:.2s; }
+.field input:focus,.field select:focus,.field textarea:focus { border-color:var(--teal); box-shadow:0 0 0 3px rgba(7,155,145,.15); }
+.field textarea { min-height:100px; resize:vertical; line-height:1.6; }
+.field-row { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:7px; }
+.field-row label { margin:0; font-size:11.5px; font-weight:700; color:var(--heading); }
+.counter { text-align:right; margin-top:4px; font-size:10.5px; color:var(--muted); }
+.gps-btn { display:inline-flex; align-items:center; gap:5px; padding:5px 11px; border:1px solid var(--teal); border-radius:20px; background:rgba(7,155,145,.12); color:var(--teal); font-size:11px; font-weight:700; white-space:nowrap; transition:.2s; }
+.gps-btn:hover { background:rgba(7,155,145,.22); transform:translateY(-1px); }
+.gps-btn:disabled { opacity:.6; cursor:wait; }
+.form-note { margin-top:10px; font-size:11.5px; line-height:1.6; color:var(--muted); }
+
+.opt-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+.opt { display:flex; flex-direction:column; align-items:center; gap:4px; padding:11px 4px; border:1.5px solid var(--border); border-radius:12px; background:var(--input); font-size:11px; font-weight:700; color:var(--text); transition:.2s; }
+.opt i { font-style:normal; font-size:20px; }
+.opt:hover { border-color:var(--teal); transform:translateY(-2px); }
+.opt.sel { border-color:var(--teal); background:rgba(7,155,145,.14); color:var(--teal); box-shadow:0 0 0 3px rgba(7,155,145,.12); }
+.seg { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.seg button { padding:11px; border:1.5px solid var(--border); border-radius:11px; background:var(--input); font-size:12px; font-weight:800; color:var(--text); transition:.2s; }
+.seg button[data-val="High"].sel { background:#fdecea; border-color:#e5543a; color:#c43b2d; }
+.seg button[data-val="Medium"].sel { background:#fff1df; border-color:#e58a20; color:#ad6b10; }
+.seg button[data-val="Low"].sel { background:#e0f8f1; border-color:#079a7c; color:#07866e; }
+
+/* ================= CHIPS / TOOLBARS ================= */
+.toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:14px; }
+.toolbar input[type=search] { flex:1; min-width:160px; padding:10px 14px; border:1px solid var(--border); border-radius:12px; background:var(--input); color:var(--text); font-size:12.5px; outline:none; }
+.toolbar input[type=search]:focus { border-color:var(--teal); box-shadow:0 0 0 3px rgba(7,155,145,.15); }
+.chips { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:14px; }
+.chip { display:inline-flex; align-items:center; gap:6px; padding:7px 13px; border:1px solid var(--border); border-radius:20px; background:var(--surface); font-size:11.5px; font-weight:700; color:var(--text); transition:.2s; }
+.chip:hover { border-color:var(--teal); color:var(--teal); }
+.chip.active { background:linear-gradient(90deg,#08b8a5,#078e91); border-color:transparent; color:#fff; box-shadow:0 6px 14px rgba(7,155,145,.28); }
+.chip em { font-style:normal; padding:1px 7px; border-radius:20px; background:rgba(128,150,165,.2); font-size:10px; }
+.chip.active em { background:rgba(255,255,255,.28); }
+
+/* ================= LISTS / CARDS ================= */
+.scroll { max-height:620px; overflow-y:auto; padding-right:6px; scrollbar-width:thin; scrollbar-color:#0d9488 transparent; }
+.scroll::-webkit-scrollbar { width:7px; }
+.scroll::-webkit-scrollbar-thumb { background:#0d9488; border-radius:10px; }
+.list { display:grid; gap:12px; align-content:start; }
+.item { padding:15px; border:1px solid var(--border); border-radius:15px; background:var(--surface2); transition:.2s; }
+.item:hover { border-color:var(--teal); transform:translateY(-2px); box-shadow:0 10px 22px rgba(7,155,145,.12); }
+.item-top { display:flex; align-items:flex-start; gap:12px; }
+.item-ico { width:42px; height:42px; flex-shrink:0; display:grid; place-items:center; border-radius:13px; background:var(--surface); border:1px solid var(--border); font-size:20px; }
+.item-main { flex:1; min-width:0; }
+.item-main h4 { margin:0; font-size:14px; color:var(--heading); }
+.item-main .sub { margin-top:3px; font-size:11px; color:var(--muted); overflow-wrap:anywhere; }
+.item p { margin:8px 0 0; font-size:12.5px; line-height:1.65; color:var(--text); opacity:.85; overflow-wrap:anywhere; }
+.item .loc { margin-top:8px; font-size:11.5px; color:var(--muted); }
+.item-actions { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:12px; }
+.pill { display:inline-block; padding:5px 10px; border-radius:20px; font-size:10px; font-weight:800; white-space:nowrap; background:#fff1df; color:#ad6b10; }
+.pill.High { background:#fdecea; color:#c43b2d; }
+.pill.Medium { background:#fff1df; color:#ad6b10; }
+.pill.Low { background:#e0f8f1; color:#07866e; }
+.status { display:inline-block; padding:5px 10px; border-radius:20px; font-size:10px; font-weight:800; white-space:nowrap; }
+.status-pending { background:#fff1df; color:#ad6b10; }
+.status-progress { background:#e5f0ff; color:#2877db; }
+.status-resolved { background:#e0f8f1; color:#07866e; }
+.mini-btn { padding:9px 14px; border:0; border-radius:9px; background:linear-gradient(90deg,#08b8a5,#078e91); color:#fff; font-size:11.5px; font-weight:800; transition:.2s; }
+.mini-btn:hover { transform:translateY(-1px); }
+.mini-btn.sec { background:rgba(40,119,219,.14); color:#2877db; }
+.mini-btn.yes { background:#079a7c; }
+.mini-btn.no { background:#fdecea; color:#c43b2d; }
+.mini-btn.wait { background:#fff1df; color:#ad6b10; cursor:wait; }
+.mini-btn:disabled { opacity:.7; transform:none; }
+.confirm-box { margin-top:12px; padding:12px; border:1px solid rgba(7,154,124,.35); border-radius:12px; background:rgba(7,154,124,.09); }
+.confirm-box b { display:block; margin-bottom:8px; font-size:12px; color:#07866e; }
+.pickup-msg { margin-top:10px; padding:10px 12px; border-radius:11px; background:rgba(7,154,124,.12); color:#07866e; font-size:12px; font-weight:700; line-height:1.5; }
+.pickup-msg small { display:block; margin-top:3px; font-weight:500; color:var(--muted); font-size:10.5px; }
+
+/* email delivery badge (Amazon SES notifications) */
+.email-pill { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:10px; padding:8px 12px; border-radius:11px; background:rgba(7,154,124,.12); color:#07866e; font-size:11.5px; font-weight:700; line-height:1.5; }
+.email-pill.failed { background:#fdecea; color:#c43b2d; }
+.email-pill.pending { background:#fff1df; color:#ad6b10; }
+.email-pill .dot { width:8px; height:8px; flex-shrink:0; border-radius:50%; background:currentColor; }
+.email-pill .txt { flex:1; min-width:0; overflow-wrap:anywhere; }
+.email-pill .resend { padding:0; border:0; background:transparent; color:inherit; font-size:11px; font-weight:800; text-decoration:underline; }
+.email-pill .resend:disabled { opacity:.6; cursor:wait; }
+
+/* timeline */
+.tl { display:flex; margin-top:14px; }
+.tl-step { flex:1; position:relative; text-align:center; font-size:10px; font-weight:700; color:var(--muted); }
+.tl-step i { position:relative; z-index:1; display:grid; place-items:center; width:24px; height:24px; margin:0 auto 5px; border-radius:50%; background:var(--surface); border:2px solid var(--border); font-style:normal; font-size:11px; }
+.tl-step::before { content:""; position:absolute; top:11px; left:-50%; width:100%; height:2px; background:var(--border); }
+.tl-step:first-child::before { display:none; }
+.tl-step.done i { background:var(--teal); border-color:var(--teal); color:#fff; }
+.tl-step.done::before,.tl-step.now::before { background:var(--teal); }
+.tl-step.now i { border-color:var(--teal); color:var(--teal); box-shadow:0 0 0 4px rgba(7,155,145,.18); }
+.tl-step.done,.tl-step.now { color:var(--heading); }
+
+/* ================= INCIDENT CAROUSEL ================= */
+.incident-card { display:none; }
+.incident-card.on { display:block; animation:viewIn .4s ease; }
+.incident-image { display:block; width:100%; height:240px; object-fit:cover; border-radius:14px; background:var(--surface2); margin-bottom:12px; }
+.incident-image.image-missing { display:none; }
+.tag { display:inline-block; padding:5px 10px; border-radius:15px; background:#fff0e8; color:#bd5125; font-size:10px; font-weight:800; }
+.incident-card h3 { margin:9px 0 6px; font-size:15px; color:var(--heading); line-height:1.4; }
+.incident-card p { margin:0 0 8px; font-size:12.5px; line-height:1.65; color:var(--text); opacity:.85; overflow-wrap:anywhere; }
+.incident-card .meta { font-size:11.5px; color:var(--muted); line-height:1.7; }
+.car-ctrl { display:flex; align-items:center; justify-content:space-between; margin-top:14px; }
+.arrow { width:40px; height:36px; border:1px solid var(--border); border-radius:10px; background:var(--surface); color:var(--teal); font-size:19px; transition:.2s; }
+.arrow:hover { background:rgba(7,155,145,.12); }
+.count-pill { display:inline-block; padding:6px 12px; border-radius:20px; background:#fff0e8; color:#bd5125; font-size:10px; font-weight:800; animation:alertPulse 2s ease-in-out infinite; }
+@keyframes alertPulse { 0%,100% { box-shadow:0 0 0 0 rgba(229,84,58,.35); } 50% { box-shadow:0 0 0 6px rgba(229,84,58,0); } }
+.accent-red { border-top:4px solid #e5543a; }
+
+/* ================= PREVIEW ROWS ================= */
+.pv { display:flex; align-items:center; gap:12px; width:100%; padding:12px; border:0; border-radius:13px; background:var(--surface2); text-align:left; transition:.2s; }
+.pv + .pv { margin-top:8px; }
+.pv:hover { transform:translateX(4px); background:rgba(7,155,145,.1); }
+.pv .pi { width:38px; height:38px; flex-shrink:0; display:grid; place-items:center; border-radius:12px; background:var(--surface); border:1px solid var(--border); font-size:18px; }
+.pv b { display:block; font-size:13px; color:var(--heading); }
+.pv small { display:block; margin-top:2px; font-size:11px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:260px; }
+
+/* ================= TIPS ================= */
+.tip-card { display:flex; align-items:center; gap:18px; margin-top:20px; padding:18px 24px; border:1px solid rgba(7,155,145,.3); border-radius:18px; background:linear-gradient(135deg,rgba(7,155,145,.12),var(--surface)); box-shadow:var(--shadow); }
+.tip-body { flex:1; min-width:0; }
+.tip-label { font-size:10px; font-weight:800; letter-spacing:1.6px; color:var(--teal); }
+.tip-title { margin:4px 0; font-size:16px; font-weight:800; color:var(--heading); }
+.tip-text { margin:0; min-height:42px; font-size:13px; line-height:1.7; color:var(--text); opacity:.85; transition:opacity .25s; }
+.tip-text.fade { opacity:0; }
+.tip-ctrl { display:flex; flex-direction:column; align-items:center; gap:10px; }
+.tip-btns { display:flex; gap:8px; }
+.dots { display:flex; gap:6px; }
+.dots i { width:8px; height:8px; border-radius:50%; background:var(--border); transition:.25s; }
+.dots i.on { width:22px; border-radius:6px; background:var(--teal); }
+.tips-grid { display:grid; grid-template-columns:1fr; gap:12px; }
+.tip-mini { display:flex; gap:12px; padding:14px; border:1px solid var(--border); border-radius:14px; background:var(--surface2); }
+.tip-mini .n { width:32px; height:32px; flex-shrink:0; display:grid; place-items:center; border-radius:10px; background:var(--teal); color:#fff; font-size:13px; font-weight:800; }
+.tip-mini b { display:block; font-size:13px; color:var(--heading); }
+.tip-mini span { display:block; margin-top:3px; font-size:12px; line-height:1.6; color:var(--muted); }
+.kit-bar { height:10px; margin:4px 0 14px; border-radius:20px; background:var(--surface2); overflow:hidden; border:1px solid var(--border); }
+.kit-bar i { display:block; height:100%; width:0; border-radius:20px; background:linear-gradient(90deg,#08b8a5,#ffd98a); transition:width .4s ease; }
+.kit-item { display:flex; align-items:center; gap:11px; padding:11px 12px; margin-bottom:8px; border:1px solid var(--border); border-radius:12px; background:var(--surface2); font-size:12.5px; cursor:pointer; transition:.2s; }
+.kit-item:hover { border-color:var(--teal); }
+.kit-item input { width:18px; height:18px; accent-color:var(--teal); }
+.kit-item.done { opacity:.7; }
+.kit-item.done span { text-decoration:line-through; }
+
+/* ================= DONATE MONEY ================= */
+.money-card { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:18px 30px; padding:24px 28px; border:1px solid rgba(217,147,34,.4); border-radius:18px; background:linear-gradient(135deg,rgba(255,217,138,.22),var(--surface)); box-shadow:var(--shadow); }
+.money-card h2 { margin:0 0 7px; font-size:19px; color:var(--heading); }
+.money-card p { margin:0; font-size:12.5px; line-height:1.7; color:var(--muted); max-width:420px; }
+.amounts { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+.amt { padding:10px 15px; border:1px solid #f0d39a; border-radius:10px; background:var(--surface); color:#a8690a; font-size:12.5px; font-weight:800; transition:.2s; }
+.amt:hover { transform:translateY(-2px); }
+.amt.active { color:#fff; background:#d99322; border-color:#d99322; }
+.amt-row { display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+.amt-row input { width:130px; padding:11px 12px; border:1px solid #f0d39a; border-radius:10px; background:var(--input); color:var(--text); font-size:13px; outline:none; }
+
+/* ================= MODALS / TOASTS ================= */
+.modal { display:none; position:fixed; inset:0; z-index:999; align-items:center; justify-content:center; padding:16px; background:rgba(9,45,70,.65); backdrop-filter:blur(4px); }
+.modal.active { display:flex; }
+.modal-card { position:relative; width:100%; max-width:440px; max-height:90vh; overflow-y:auto; padding:24px; border-radius:20px; background:var(--surface); color:var(--text); box-shadow:0 20px 40px rgba(0,0,0,.3); animation:qrUp .25s ease-out; }
+.modal-card.center { text-align:center; }
+@keyframes qrUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+.modal-x { position:absolute; top:14px; right:14px; width:32px; height:32px; display:grid; place-items:center; border:0; border-radius:50%; background:var(--surface2); color:var(--heading); font-size:15px; font-weight:700; }
+.modal-card h3 { margin:0 0 4px; font-size:18px; color:var(--heading); }
+.kv { display:grid; grid-template-columns:100px 1fr; gap:8px 12px; margin-top:14px; font-size:12.5px; }
+.kv dt { color:var(--muted); font-weight:600; }
+.kv dd { margin:0; color:var(--heading); font-weight:600; overflow-wrap:anywhere; }
+.qr-box { display:inline-block; padding:14px; margin:14px 0; background:#fff; border:2px dashed #079b91; border-radius:16px; }
+.qr-box img,.qr-box canvas { display:block; margin:0 auto; }
+.qr-amt { display:inline-block; padding:5px 14px; border-radius:20px; background:rgba(7,154,124,.14); color:#07866e; font-size:15px; font-weight:800; }
+.toasts { position:fixed; top:80px; right:20px; z-index:1200; display:grid; gap:10px; }
+.toast { display:flex; align-items:flex-start; gap:10px; width:330px; max-width:calc(100vw - 32px); padding:13px 15px; border-radius:14px; background:var(--surface); border:1px solid var(--border); border-left:4px solid var(--teal); box-shadow:0 14px 30px rgba(9,45,70,.22); font-size:12.5px; line-height:1.5; color:var(--text); opacity:0; transform:translateX(30px); transition:.3s; }
+.toast.show { opacity:1; transform:translateX(0); }
+.toast.error { border-left-color:#e5543a; }
+.toast.info { border-left-color:#2877db; }
+
+.footer { display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-top:28px; padding-top:16px; border-top:1px solid var(--border); font-size:11.5px; color:var(--muted); }
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-slide,.hero-bg { transition-duration:.01s; }
+}
+
+/* ================= RESPONSIVE ================= */
+@media(max-width:1200px) {
+    .qa-grid,.stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .hl-strip { grid-template-columns:repeat(3,minmax(0,1fr)); }
+}
+@media(max-width:1000px) {
+    .main { margin-left:0; }
+    .sidebar { transform:translateX(-100%); }
+    .sidebar.open { transform:translateX(0); }
+    .scrim.show { display:block; }
+    .menu-btn { display:grid; }
+    .topbar { padding:12px 16px; }
+    .content { padding:18px 16px 90px; }
+    .grid-2 { grid-template-columns:1fr; }
+    .grid-3 { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .rl-clock { display:none; }
+}
+@media(max-width:600px) {
+    .tb-title p { display:none; }
+    .tb-title h1 { font-size:17px; }
+    .sos-btn { padding:10px 14px; }
+    .hero { padding:26px 22px 54px; }
+    .hero-slider { height:300px; }
+    .hero-dots { left:22px; bottom:20px; }
+    .tip-card { flex-wrap:wrap; }
+    .tip-ctrl { flex-direction:row; width:100%; justify-content:space-between; }
+    .incident-image { height:180px; }
+    .greet h2 { font-size:21px; }
+    .toasts { right:12px; top:70px; }
+}
+@media(max-width:450px) {
+    .qa-grid,.stats { grid-template-columns:1fr; }
+    .grid-3 { grid-template-columns:1fr; }
+    .hl-strip { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .opt-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+</style>
+</head>
+
+<body data-page="user">
+<div class="app">
+
+    <div class="scrim" id="scrim"></div>
+
+    <!-- ================= SIDEBAR ================= -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sb-brand">
+            <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <defs>
+                    <linearGradient id="emblemGrad" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stop-color="#5df0d9"/>
+                        <stop offset="1" stop-color="#079b91"/>
+                    </linearGradient>
+                </defs>
+                <path fill="url(#emblemGrad)" d="M24 43C8 31 3 22 3 14.5 3 8.7 7.6 4.5 13 4.5c4.4 0 8.4 2.5 11 6.6 2.6-4.1 6.6-6.6 11-6.6 5.4 0 10 4.2 10 10 0 7.5-5 16.5-21 28.5z"/>
+                <rect x="21.8" y="13" width="4.4" height="16" rx="2.2" fill="#fff"/>
+                <rect x="16" y="18.8" width="16" height="4.4" rx="2.2" fill="#fff"/>
+            </svg>
+            <div><b>ReliefLink</b><small>Community Emergency</small></div>
+        </div>
+
+        <div class="sb-label">MENU</div>
+        <button type="button" class="sb-link active" data-view="overview" data-goto="overview"><span class="ic">🏠</span>Overview</button>
+        <button type="button" class="sb-link" data-view="community" data-goto="community"><span class="ic">🌐</span>Community<span class="sb-badge" id="badgeCommunity">0</span></button>
+        <button type="button" class="sb-link" data-view="requests" data-goto="requests"><span class="ic">🆘</span>My Requests<span class="sb-badge" id="badgeRequests">0</span></button>
+        <button type="button" class="sb-link" data-view="donations" data-goto="donations"><span class="ic">🎁</span>Donations<span class="sb-badge" id="badgeDonations">0</span></button>
+        <button type="button" class="sb-link" data-view="safety" data-goto="safety"><span class="ic">🛡️</span>Safety Centre</button>
+
+        <a class="sb-volunteer" href="register-volunteer.html">＋ Become a Volunteer</a>
+
+        <div class="sb-spacer"></div>
+
+        <div class="sb-user" id="userBadge" title="Click to change profile photo">
+            <div class="avatar">
+                <img id="userAvatarImg" alt="Profile Photo">
+                <span id="userAvatarInitial">U</span>
+            </div>
+            <div class="meta">
+                <strong id="userNameDisplay">Community User</strong>
+                <small id="userEmailDisplay">Signed in</small>
+            </div>
+        </div>
+        <input type="file" id="profilePhotoFileInput" accept="image/*" style="display:none;">
+        <a class="sb-logout" id="userLogoutBtn" href="login.html">⇥ Logout</a>
+    </aside>
+
+    <!-- ================= MAIN ================= -->
+    <div class="main">
+
+        <div class="offline" id="offlineBanner">⚠️ Cannot connect to the ReliefLink server. Check network connection or verify EC2 backend status.</div>
+
+        <header class="topbar">
+            <button type="button" class="icon-btn menu-btn" id="menuBtn" aria-label="Open menu">☰</button>
+            <div class="tb-title">
+                <h1 id="viewTitle">Overview</h1>
+                <p id="viewSub">Your relief activity at a glance</p>
+            </div>
+            <div class="tb-actions">
+                <div class="rl-clock">
+                    <strong id="clockTime">--:--</strong>
+                    <span id="clockDate">&nbsp;</span>
+                </div>
+                <button type="button" class="icon-btn" id="themeBtn" aria-label="Toggle dark mode">🌙</button>
+                <div class="bell-wrap">
+                    <button type="button" class="icon-btn" id="bellBtn" aria-label="Notifications">🔔<span class="bell-dot" id="bellDot">0</span></button>
+                    <div class="notif-pop" id="notifPop"></div>
+                </div>
+                <a class="sos-btn" href="tel:112" aria-label="Call emergency number 112">🆘 Call 112</a>
+            </div>
+        </header>
+
+        <main class="content">
+
+            <!-- ============ VIEW: OVERVIEW ============ -->
+            <section class="view active" id="view-overview">
+
+                <div class="greet">
+                    <h2 id="greetText">Hello </h2>
+                    <p>Here is what is happening in your community today.</p>
+                </div>
+
+                <section class="hero" id="heroBanner">
+                    <div class="hero-bgs" id="heroBgs">
+                        <div class="hero-bg on" style="background-image:url('https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&w=1500&q=85')"></div>
+                        <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1500&q=85')"></div>
+                        <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=1500&q=85')"></div>
+                        <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=1500&q=85')"></div>
+                        <div class="hero-bg" style="background-image:url('https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?auto=format&fit=crop&w=1500&q=85')"></div>
+                    </div>
+
+                    <div class="hero-slider">
+                        <div class="hero-slide active"><div class="hero-copy">
+                            <div class="hero-tag">BECOME A VOLUNTEER</div>
+                            <h2>Your Small Act<br><span>Can Save a Life.</span></h2>
+                            <p>One hour of your time can bring food, water or safety to a family in need. Join ReliefLink volunteers today.</p>
+                        </div></div>
+                        <div class="hero-slide"><div class="hero-copy">
+                            <div class="hero-tag">BE THE HELPING HAND</div>
+                            <h2>Be the Help<br><span>Someone Is Praying For.</span></h2>
+                            <p>When disaster strikes, neighbours reach out first. Be the reason a family feels less alone.</p>
+                        </div></div>
+                        <div class="hero-slide"><div class="hero-copy">
+                            <div class="hero-tag">EVERY SKILL MATTERS</div>
+                            <h2>Heroes Don't Always<br><span>Wear Capes.</span></h2>
+                            <p>Deliver supplies, share alerts, offer a ride or simply listen. Whatever you can do, ReliefLink has a place for you.</p>
+                        </div></div>
+                        <div class="hero-slide"><div class="hero-copy">
+                            <div class="hero-tag">SERVE WITH PURPOSE</div>
+                            <h2>Serve Today.<br><span>Inspire Tomorrow.</span></h2>
+                            <p>Your kindness inspires others to step forward. Start a chain of good that spreads across your community.</p>
+                        </div></div>
+                        <div class="hero-slide"><div class="hero-copy">
+                            <div class="hero-tag">JOIN YOUR NEIGHBOURS</div>
+                            <h2>Join Hands.<br><span>Make a Difference.</span></h2>
+                            <p>Hundreds of small actions build a safer community. Register as a volunteer and be ready when it matters most.</p>
+                        </div></div>
+                    </div>
+
+                    <div class="hero-cta"><a class="btn" href="register-volunteer.html">＋ Become a Volunteer →</a></div>
+                    <div class="hero-dots" id="heroDots"></div>
+                </section>
+
+                <section class="stats">
+                    <article class="stat" style="--c:#2877db"><div class="si">▤</div><div><small>Total Requests</small><b id="userTotal">0</b></div></article>
+                    <article class="stat" style="--c:#e58a20"><div class="si">◷</div><div><small>Pending / In Progress</small><b id="userProgress">0</b></div></article>
+                    <article class="stat" style="--c:#079a7c"><div class="si">✓</div><div><small>Resolved Requests</small><b id="userResolved">0</b></div></article>
+                    <article class="stat" style="--c:#8654cf"><div class="si">🎁</div><div><small>Items Donated</small><b id="userDonated">0</b></div></article>
+                </section>
+
+                <section class="qa-grid">
+                    <button type="button" class="qa" style="--c:#e5543a" data-goto="requests" data-focus="requestForm"><div class="qi">🆘</div><strong>Request Help</strong><span class="d">Need food, water, shelter or rescue? Tell the community.</span><span class="go">Open form →</span></button>
+                    <button type="button" class="qa" style="--c:#e58a20" data-goto="donations"><div class="qi">🎁</div><strong>Donate Items</strong><span class="d">Share food, medicine or clothing. A volunteer collects it.</span><span class="go">Donate now →</span></button>
+                    <button type="button" class="qa" style="--c:#d99322" id="qaMoney"><div class="qi">💛</div><strong>Donate Money</strong><span class="d">Scan a UPI QR and give instantly to relief efforts.</span><span class="go">Show QR →</span></button>
+                    <button type="button" class="qa" style="--c:#2877db" data-goto="community"><div class="qi">🤝</div><strong>Help a Neighbour</strong><span class="d">See who needs support near you and offer a hand.</span><span class="go">Browse requests →</span></button>
+                </section>
+
+                <section class="grid-2">
+                    <div class="card">
+                        <div class="card-head">
+                            <div class="h-ico red">🚨</div>
+                            <div class="grow"><h2>Latest Incident Alerts</h2><p>Roadblocks, accidents and emergencies.</p></div>
+                            <button type="button" class="small-btn" data-goto="community">View all</button>
+                        </div>
+                        <div id="pvIncidents"><div class="empty">Loading alerts...</div></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-head">
+                            <div class="h-ico">🤝</div>
+                            <div class="grow"><h2>People Who Need Help</h2><p>Open requests from your community.</p></div>
+                            <button type="button" class="small-btn" data-goto="community">View all</button>
+                        </div>
+                        <div id="pvRequests"><div class="empty">Loading requests...</div></div>
+                    </div>
+                </section>
+
+                <div class="card" style="margin-top:20px;">
+                    <div class="card-head">
+                        <div class="h-ico red">📞</div>
+                        <div class="grow"><h2>Emergency Helplines</h2><p>In danger? Tap a number to open the dial pad.</p></div>
+                    </div>
+                    <div class="hl-strip" id="helplineMini"></div>
+                </div>
+
+                <section class="tip-card">
+                    <div class="h-ico" style="width:50px;height:50px;">💡</div>
+                    <div class="tip-body">
+                        <div class="tip-label">SAFETY TIP</div>
+                        <h3 class="tip-title" id="tipTitle">Stay prepared</h3>
+                        <p class="tip-text" id="tipText">Keep an emergency kit ready.</p>
+                    </div>
+                    <div class="tip-ctrl">
+                        <div class="tip-btns">
+                            <button class="arrow" id="tipPrev" type="button" aria-label="Previous tip">&#8592;</button>
+                            <button class="arrow" id="tipNext" type="button" aria-label="Next tip">&#8594;</button>
+                        </div>
+                        <div class="dots" id="tipDots"></div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- ============ VIEW: COMMUNITY ============ -->
+            <section class="view" id="view-community">
+                <div class="grid-2">
+
+                    <section class="card accent-red">
+                        <div class="card-head">
+                            <div class="h-ico red">🚨</div>
+                            <div class="grow"><h2>Community Incident Alerts</h2><p>Roadblocks, accidents, traffic and emergency updates.</p></div>
+                            <button class="small-btn" id="refreshIncidents" type="button">↻ Refresh</button>
+                        </div>
+                        <span class="count-pill" id="incidentCount">0 ALERTS</span>
+                        <div id="incidentList" style="margin-top:14px;"><div class="empty">Loading incident alerts...</div></div>
+                        <div class="car-ctrl" id="incidentControls" style="display:none;">
+                            <button type="button" class="arrow" id="previousIncident" aria-label="Previous incident">&#8592;</button>
+                            <span id="incidentSlideCounter" style="font-size:11px;font-weight:700;color:var(--muted);">0 / 0</span>
+                            <button type="button" class="arrow" id="nextIncident" aria-label="Next incident">&#8594;</button>
+                        </div>
+                    </section>
+
+                    <section class="card">
+                        <div class="card-head">
+                            <div class="h-ico">🤝</div>
+                            <div class="grow"><h2>Other Users Need Help</h2><p>Can you help a community member? Offer support below.</p></div>
+                            <button class="small-btn" id="refreshHelpRequests" type="button">↻ Refresh</button>
+                        </div>
+                        <div class="toolbar"><input type="search" id="commSearch" placeholder="🔍 Search type, location, description..."></div>
+                        <div class="chips" id="commChips">
+                            <button type="button" class="chip active" data-ctype="all">All</button>
+                            <button type="button" class="chip" data-ctype="Food">🍲 Food</button>
+                            <button type="button" class="chip" data-ctype="Water">💧 Water</button>
+                            <button type="button" class="chip" data-ctype="Medical">🏥 Medical</button>
+                            <button type="button" class="chip" data-ctype="Shelter">🏠 Shelter</button>
+                            <button type="button" class="chip" data-ctype="Clothing">👕 Clothing</button>
+                            <button type="button" class="chip" data-ctype="Rescue">🛟 Rescue</button>
+                        </div>
+                        <div class="scroll"><div class="list" id="communityHelpList"><div class="empty">Loading community requests...</div></div></div>
+                    </section>
+
+                </div>
+            </section>
+
+            <!-- ============ VIEW: MY REQUESTS ============ -->
+            <section class="view" id="view-requests">
+                <div class="grid-2">
+
+                    <section class="card" id="newRequest">
+                        <div class="card-head">
+                            <div class="h-ico blue">＋</div>
+                            <div class="grow"><h2>Submit an Emergency Request</h2><p>Share details so local volunteers can locate and support you.</p></div>
+                        </div>
+
+                        <form id="requestForm">
+                            <div class="field">
+                                <span class="lbl">What do you need? <span class="req">*</span></span>
+                                <div class="opt-grid" data-target="requestType">
+                                    <button type="button" class="opt sel" data-val="Food"><i>🍲</i>Food</button>
+                                    <button type="button" class="opt" data-val="Water"><i>💧</i>Water</button>
+                                    <button type="button" class="opt" data-val="Medical"><i>🏥</i>Medical</button>
+                                    <button type="button" class="opt" data-val="Shelter"><i>🏠</i>Shelter</button>
+                                    <button type="button" class="opt" data-val="Clothing"><i>👕</i>Clothing</button>
+                                    <button type="button" class="opt" data-val="Rescue"><i>🛟</i>Rescue</button>
+                                    <button type="button" class="opt" data-val="Other"><i>📦</i>Other</button>
+                                </div>
+                                <input type="hidden" id="requestType" name="type" value="Food">
+                            </div>
+
+                            <div class="field">
+                                <span class="lbl">Priority <span class="req">*</span></span>
+                                <div class="seg" data-target="priority">
+                                    <button type="button" data-val="High">🔴 High</button>
+                                    <button type="button" class="sel" data-val="Medium">🟠 Medium</button>
+                                    <button type="button" data-val="Low">🟢 Low</button>
+                                </div>
+                                <input type="hidden" id="priority" name="priority" value="Medium">
+                            </div>
+
+                            <div class="field">
+                                <div class="field-row">
+                                    <label for="location">Location / Landmark <span class="req">*</span></label>
+                                    <button type="button" id="getGpsBtn" class="gps-btn">📍 Use My Current Location</button>
+                                </div>
+                                <input id="location" name="location" placeholder="e.g. Near Calicut University, or click button above" required>
+                                <div id="mapPreview" style="display:none;margin-top:10px;height:180px;border-radius:12px;overflow:hidden;border:1px solid var(--border);"></div>
+                            </div>
+
+                            <div class="field">
+                                <label for="details">Description <span class="req">*</span></label>
+                                <textarea id="details" name="details" maxlength="1000" placeholder="Describe your emergency and how many people are affected..." required></textarea>
+                                <div class="counter"><span id="detailsCount">0</span> / 1000</div>
+                            </div>
+
+                            <button class="btn block" type="submit">➤ Submit Emergency Request</button>
+                            <div class="form-note" id="requestFormMessage">Accurate location details speed up volunteer response.</div>
+                        </form>
+                    </section>
+
+                    <section class="card" id="myRequests">
+                        <div class="card-head">
+                            <div class="h-ico blue">▤</div>
+                            <div class="grow"><h2>My Requests</h2><p>Track progress and confirm when help arrives.</p></div>
+                        </div>
+                        <div class="toolbar"><input type="search" id="requestSearch" placeholder="🔍 Search by type, location, priority..."></div>
+                        <div class="chips" id="reqChips">
+                            <button type="button" class="chip active" data-rstatus="all">All <em id="rcAll">0</em></button>
+                            <button type="button" class="chip" data-rstatus="pending">Pending <em id="rcPending">0</em></button>
+                            <button type="button" class="chip" data-rstatus="progress">In Progress <em id="rcProgress">0</em></button>
+                            <button type="button" class="chip" data-rstatus="resolved">Resolved <em id="rcResolved">0</em></button>
+                        </div>
+                        <div class="scroll"><div class="list" id="myRequestsList"><div class="empty">Loading your requests...</div></div></div>
+                    </section>
+
+                </div>
+            </section>
+
+            <!-- ============ VIEW: DONATIONS ============ -->
+            <section class="view" id="view-donations">
+                <div class="grid-2">
+
+                    <section class="card" id="donateItemsSection">
+                        <div class="card-head">
+                            <div class="h-ico amber">🎁</div>
+                            <div class="grow"><h2>Donate Food, Medicine, or Clothing</h2><p>Offer extra supplies. A volunteer will schedule a pickup.</p></div>
+                        </div>
+
+                        <form id="donationForm">
+                            <div class="field">
+                                <span class="lbl">Item category <span class="req">*</span></span>
+                                <div class="opt-grid" data-target="donationCategory">
+                                    <button type="button" class="opt sel" data-val="Food"><i>🍚</i>Food</button>
+                                    <button type="button" class="opt" data-val="Medicine"><i>💊</i>Medicine</button>
+                                    <button type="button" class="opt" data-val="Clothing"><i>🧥</i>Clothing</button>
+                                    <button type="button" class="opt" data-val="Other"><i>📦</i>Other</button>
+                                </div>
+                                <input type="hidden" id="donationCategory" value="Food">
+                            </div>
+
+                            <div class="field">
+                                <label for="donationQuantity">Quantity / Units <span class="req">*</span></label>
+                                <input id="donationQuantity" placeholder="e.g. 5 kits, 10 packets" required>
+                            </div>
+
+                            <div class="field">
+                                <div class="field-row">
+                                    <label for="donationLocation">Pickup Location <span class="req">*</span></label>
+                                    <button type="button" id="getDonationGpsBtn" class="gps-btn">📍 Use My Current Location</button>
+                                </div>
+                                <input id="donationLocation" placeholder="e.g. Calicut Airport Road, or click button above" required>
+                            </div>
+
+                            <div class="field">
+                                <label for="donationDetails">Item Details &amp; Condition <span class="req">*</span></label>
+                                <textarea id="donationDetails" maxlength="600" placeholder="e.g. Unopened medicine packets, fresh dry rations, unused blankets..." required></textarea>
+                            </div>
+
+                            <button class="btn block" type="submit">🎁 Submit Item Donation</button>
+                            <div class="form-note" id="donationFormMessage">Volunteers will review and notify you when scheduled.</div>
+                        </form>
+                    </section>
+
+                    <section class="card" id="myDonationsStatus">
+                        <div class="card-head">
+                            <div class="h-ico amber">📦</div>
+                            <div class="grow"><h2>My Donations &amp; Pickup Status</h2><p>See which volunteer is collecting your items.</p></div>
+                        </div>
+                        <div class="scroll"><div class="list" id="userDonationsList"><div class="empty">Loading your donations...</div></div></div>
+                    </section>
+
+                </div>
+
+                <section class="money-card" id="donationPanel" style="margin-top:20px;">
+                    <div>
+                        <h2>💛 Support ReliefLink</h2>
+                        <p>Your donation helps provide food, clean water, medical supplies and emergency essentials. Scan with Google Pay, PhonePe, Paytm or any UPI app.</p>
+                    </div>
+                    <div>
+                        <div class="amounts">
+                            <button class="amt" type="button" data-amount="100">₹100</button>
+                            <button class="amt active" type="button" data-amount="250">₹250</button>
+                            <button class="amt" type="button" data-amount="500">₹500</button>
+                            <button class="amt" type="button" data-amount="1000">₹1,000</button>
+                        </div>
+                        <div class="amt-row">
+                            <input type="number" id="customAmount" min="1" placeholder="Custom ₹">
+                            <button class="btn" id="donateButton" type="button">♡ Donate ₹250</button>
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- ============ VIEW: SAFETY ============ -->
+            <section class="view" id="view-safety">
+                <div class="card" style="margin-bottom:20px;">
+                    <div class="card-head">
+                        <div class="h-ico red">📞</div>
+                        <div class="grow"><h2>Emergency Helplines</h2><p>Tap any card to call right away.</p></div>
+                    </div>
+                    <div class="grid-3" id="helplineGrid"></div>
+                </div>
+
+                <div class="grid-2">
+                    <section class="card">
+                        <div class="card-head">
+                            <div class="h-ico">💡</div>
+                            <div class="grow"><h2>Safety Tips</h2><p>Small habits that protect your family.</p></div>
+                        </div>
+                        <div class="tips-grid" id="tipsGrid"></div>
+                    </section>
+
+                    <section class="card">
+                        <div class="card-head">
+                            <div class="h-ico amber">🎒</div>
+                            <div class="grow"><h2>My Emergency Kit</h2><p>Tick items as you pack them. Your progress is saved.</p></div>
+                            <b id="kitPercent" style="font-size:18px;color:var(--teal);">0%</b>
+                        </div>
+                        <div class="kit-bar"><i id="kitBar"></i></div>
+                        <div id="kitList"></div>
+                    </section>
+                </div>
+            </section>
+
+            <footer class="footer">
+                <span><strong>ReliefLink</strong> | Community Emergency Resource Platform</span>
+                <span>Supporting communities, one request at a time. 💚</span>
+            </footer>
+        </main>
+    </div>
+</div>
+
+<!-- ================= MODALS & TOASTS ================= -->
+<div class="modal" id="infoModal" aria-hidden="true">
+    <div class="modal-card">
+        <button type="button" class="modal-x" data-close="infoModal" aria-label="Close">✕</button>
+        <h3 id="infoTitle">Details</h3>
+        <div id="infoBody"></div>
+    </div>
+</div>
+
+<!-- GPS Permission Dialog Modal -->
+<div class="modal" id="locationPermissionModal" aria-hidden="true">
+    <div class="modal-card center">
+        <button type="button" class="modal-x" data-close="locationPermissionModal" aria-label="Close">✕</button>
+        <div style="font-size:38px;margin-bottom:8px;">📍</div>
+        <h3>Enable Device Location</h3>
+        <p style="margin:8px 0 16px;font-size:13px;line-height:1.6;color:var(--muted);">
+            Allow ReliefLink to access your device's GPS so volunteers can locate your exact relief spot on the map.
+        </p>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+            <button type="button" class="small-btn" id="denyLocationModalBtn">Enter Manually</button>
+            <button type="button" class="btn" id="confirmLocationModalBtn">Allow Location</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="qrModal" aria-hidden="true">
+    <div class="modal-card center">
+        <button type="button" class="modal-x" id="closeQrModal" aria-label="Close modal">✕</button>
+        <h3>Scan &amp; Pay with UPI</h3>
+        <p style="margin:4px 0 10px;font-size:12px;color:var(--muted);">Google Pay · PhonePe · Paytm · Any UPI App</p>
+        <div class="qr-amt" id="qrModalAmountBadge">₹250</div>
+        <div><div class="qr-box" id="qrTarget"></div></div>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+            <button type="button" class="small-btn" id="copyUpiBtn">📋 Copy UPI ID</button>
+            <a class="small-btn" id="openUpiBtn" href="#" style="text-decoration:none;">📱 Open UPI App</a>
+        </div>
+        <p style="margin:12px 0 0;font-size:11px;line-height:1.5;color:var(--muted);">Scan using any UPI camera to complete your contribution directly to ReliefLink.</p>
+    </div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script>
+"use strict";
+
+/* ====================== HELPERS ====================== */
+const $ = id => document.getElementById(id);
+
+function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, ch => ({
+        "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+    })[ch]);
+}
+
+function formatLocationDisplay(locationStr) {
+    const raw = String(locationStr || "").trim();
+    if (!raw) return "Location not specified";
+    const coordMatch = raw.match(/-?\d{1,3}\.\d+,\s*-?\d{1,3}\.\d+/);
+    if (coordMatch) {
+        const coords = coordMatch[0];
+        const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(coords)}`;
+        return `<a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" style="color:var(--teal);font-weight:700;text-decoration:underline;">Open in Maps (${escapeHTML(coords)})</a>`;
+    }
+    return escapeHTML(raw);
+}
+
+function statusClass(status) {
+    const s = String(status || "Pending").toLowerCase();
+    if (s.includes("resolved") || s.includes("completed") || s.includes("picked")) return "status-resolved";
+    if (s.includes("progress") || s.includes("scheduled")) return "status-progress";
+    return "status-pending";
+}
+
+function setOffline(flag) { $("offlineBanner").classList.toggle("show", !!flag); }
+
+async function fetchJSON(url, options = {}) {
+    let response;
+    try {
+        response = await fetch(url, {
+            cache:"no-store",
+            credentials:"include",
+            ...options,
+            headers:{ "Accept":"application/json", ...(options.headers || {}) }
+        });
+    } catch (e) {
+        setOffline(true);
+        throw new Error("Cannot connect to server. Check backend service status.");
+    }
+    setOffline(false);
+
+    const text = await response.text();
+    let data = {};
+    if (text) { try { data = JSON.parse(text); } catch { data = { message:text }; } }
+    if (!response.ok) throw new Error(data.error || data.message || "Request failed: " + response.status);
+    return data;
+}
+
+function getArray(data, keys = []) {
+    if (Array.isArray(data)) return data;
+    for (const k of keys) if (Array.isArray(data?.[k])) return data[k];
+    return [];
+}
+
+function toast(message, type = "success") {
+    const icons = { success:"✅", error:"⚠️", info:"ℹ️" };
+    const el = document.createElement("div");
+    el.className = "toast " + type;
+    el.innerHTML = `<span>${icons[type] || "ℹ️"}</span><div>${escapeHTML(message)}</div>`;
+    $("toasts").appendChild(el);
+    requestAnimationFrame(() => el.classList.add("show"));
+    setTimeout(() => { el.classList.remove("show"); setTimeout(() => el.remove(), 320); }, 3800);
+}
+
+function animateCount(el, to) {
+    if (!el) return;
+    const from = Number(el.dataset.v || 0);
+    el.dataset.v = to;
+    if (from === to) { el.textContent = to; return; }
+    const start = performance.now(), dur = 700;
+    function step(now) {
+        const p = Math.min(1, (now - start) / dur);
+        el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3)));
+        if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+}
+
+const TYPE_ICON = { Food:"🍲", Water:"💧", Medical:"🏥", Shelter:"🏠", Clothing:"👕", Rescue:"🛟", Other:"📦", Medicine:"💊" };
+const iconFor = t => TYPE_ICON[t] || "🆘";
+
+/* ====================== EMAIL (AMAZON SES) HELPERS ====================== */
+function getEmailStatus(item) {
+    if (!item) return "";
+    if (item.email_status) return String(item.email_status).trim().toLowerCase();
+    if (item.email_sent === true) return "sent";
+    if (item.email_sent === false) return "failed";
+    return "";
+}
+
+function emailToastSuffix(result, to) {
+    if (result && result.email_sent === true) return " A confirmation email was sent to " + (result.email_to || to) + ".";
+    if (result && result.email_sent === false) return " The email notification could not be sent.";
+    return "";
+}
+
+function emailPillHTML(kind, id, item, label) {
+    const status = getEmailStatus(item);
+    if (!status) return "";
+
+    const to = escapeHTML(item.email_to || item.donor_email || item.owner || item.email || myEmail());
+    const safeId = escapeHTML(id);
+    let cls = "", text = "", action = "";
+
+    if (status === "sent") {
+        text = `✓ ${label} sent to <strong>${to}</strong>`;
+        action = "Resend";
+    } else if (status === "failed") {
+        cls = " failed";
+        text = `✉️ ${label} could not be delivered to <strong>${to}</strong>`;
+        action = "Try again";
+    } else {
+        cls = " pending";
+        text = `✉️ ${label} is being sent to <strong>${to}</strong>...`;
+    }
+
+    const btn = action
+        ? `<button type="button" class="resend" data-resend-kind="${kind}" data-resend-id="${safeId}">${action}</button>`
+        : "";
+
+    return `<div class="email-pill${cls}"><span class="dot"></span><span class="txt">${text}</span>${btn}</div>`;
+}
+
+function emailNoteHTML(text) {
+    return `<div class="email-pill"><span class="dot"></span><span class="txt">${text}</span></div>`;
+}
+
+/* ====================== SESSION ====================== */
+const SESSION_KEY = "rl_session";
+const ROLE_PAGES = { user:"user-dashboard.html", volunteer:"volunteer-dashboard.html", admin:"admin-dashboard.html" };
+
+function normalizeRole(value) {
+    const role = String(value || "").trim().toLowerCase();
+    if (["user", "community user", "community-user", "community_user"].includes(role)) return "user";
+    if (["volunteer", "community volunteer"].includes(role)) return "volunteer";
+    if (["admin", "administrator"].includes(role)) return "admin";
+    return "";
+}
+
+function blockPage(title, text, linkText, href) {
+    document.body.innerHTML = `
+        <div style="min-height:100vh;display:grid;place-items:center;font-family:Inter,sans-serif;background:#eef4f9;padding:20px;">
+            <div style="max-width:420px;text-align:center;background:#fff;padding:32px;border-radius:20px;box-shadow:0 20px 40px rgba(9,45,70,.15);">
+                <div style="font-size:42px;">🔒</div>
+                <h2 style="margin:10px 0 6px;color:#092d46;">${title}</h2>
+                <p style="color:#72869b;font-size:14px;line-height:1.6;">${text}</p>
+                <a href="${href}" style="display:inline-block;margin-top:12px;padding:13px 26px;border-radius:12px;background:linear-gradient(90deg,#08b8a5,#078e91);color:#fff;text-decoration:none;font-weight:700;">${linkText}</a>
+            </div>
+        </div>`;
+}
+
+let session = null;
+try { session = JSON.parse(localStorage.getItem(SESSION_KEY) || "null"); } catch { session = null; }
+
+if (!session || !session.email) {
+    blockPage("Session not found", "Please sign in to open your dashboard.", "Go to Login", "login.html");
+    throw new Error("No active session");
+}
+
+const sessionRole = normalizeRole(session.role);
+if (sessionRole && sessionRole !== "user") {
+    blockPage("Different account type", "You are signed in as a " + sessionRole + ". Opening your dashboard...", "Open my dashboard", ROLE_PAGES[sessionRole]);
+    setTimeout(() => location.replace(ROLE_PAGES[sessionRole]), 1200);
+    throw new Error("Wrong role for user dashboard");
+}
+
+const myEmail = () => String(session?.email || "").trim().toLowerCase();
+const myName = () => session.name || myEmail().split("@")[0] || "Community User";
+
+$("userLogoutBtn").addEventListener("click", () => localStorage.removeItem(SESSION_KEY));
+
+/* ====================== PROFILE PHOTO ====================== */
+function setupUserProfile() {
+    const email = myEmail();
+    const name = myName();
+    $("userNameDisplay").textContent = name;
+    $("userEmailDisplay").textContent = email;
+    $("userAvatarInitial").textContent = name.charAt(0).toUpperCase();
+
+    const photoKey = "rl_avatar_" + email;
+    const currentPhoto = session.profile_photo || localStorage.getItem(photoKey);
+    const imgEl = $("userAvatarImg"), initEl = $("userAvatarInitial");
+
+    if (currentPhoto) {
+        imgEl.src = currentPhoto;
+        imgEl.style.display = "block";
+        initEl.style.display = "none";
+    }
+
+    $("userBadge").addEventListener("click", () => $("profilePhotoFileInput").click());
+
+    $("profilePhotoFileInput").addEventListener("change", async e => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        if (!file.type.startsWith("image/")) { toast("Please choose a valid image file.", "error"); return; }
+        if (file.size > 5 * 1024 * 1024) { toast("The image must be 5 MB or smaller.", "error"); return; }
+
+        const reader = new FileReader();
+        reader.onload = evt => {
+            imgEl.src = evt.target.result;
+            imgEl.style.display = "block";
+            initEl.style.display = "none";
+        };
+        reader.readAsDataURL(file);
+
+        const formData = new FormData();
+        formData.append("profile_photo", file);
+        try {
+            const data = await fetchJSON("/api/profile-photo", { method:"POST", body:formData });
+            if (data.photo_url) {
+                session.profile_photo = data.photo_url;
+                localStorage.setItem(photoKey, data.photo_url);
+                localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+                imgEl.src = data.photo_url;
+            }
+            toast("Profile photo updated.", "success");
+        } catch (err) {
+            toast(err.message || "Could not upload photo.", "error");
+        }
+        e.target.value = "";
+    });
+}
+setupUserProfile();
+
+/* ====================== THEME ====================== */
+function applyTheme(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    $("themeBtn").textContent = t === "dark" ? "☀️" : "🌙";
+    try { localStorage.setItem("rl_theme", t); } catch (e) {}
+}
+applyTheme(document.documentElement.getAttribute("data-theme") || "light");
+$("themeBtn").addEventListener("click", () => {
+    applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
+});
+
+/* ====================== NAVIGATION ====================== */
+const VIEW_META = {
+    overview:  ["Overview", "Your relief activity at a glance"],
+    community: ["Community", "Alerts and neighbours who need a hand"],
+    requests:  ["My Requests", "Ask for help and track progress"],
+    donations: ["Donations", "Give items or money to people in need"],
+    safety:    ["Safety Centre", "Helplines, tips and your emergency kit"]
+};
+
+function openSidebar() { $("sidebar").classList.add("open"); $("scrim").classList.add("show"); }
+function closeSidebar() { $("sidebar").classList.remove("open"); $("scrim").classList.remove("show"); }
+$("menuBtn").addEventListener("click", openSidebar);
+$("scrim").addEventListener("click", closeSidebar);
+
+function showView(name, save = true) {
+    if (!VIEW_META[name]) name = "overview";
+    document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === "view-" + name));
+    document.querySelectorAll(".sb-link").forEach(b => b.classList.toggle("active", b.dataset.view === name));
+    $("viewTitle").textContent = VIEW_META[name][0];
+    $("viewSub").textContent = VIEW_META[name][1];
+    closeSidebar();
+    $("notifPop").classList.remove("open");
+    window.scrollTo({ top:0, behavior:"smooth" });
+    if (save) { try { sessionStorage.setItem("rl_user_view", name); } catch (e) {} }
+}
+
+try {
+    const savedView = sessionStorage.getItem("rl_user_view");
+    if (savedView) showView(savedView, false);
+} catch (e) {}
+
+/* ====================== CLOCK + GREETING ====================== */
+function updateClock() {
+    const now = new Date();
+    $("clockTime").textContent = now.toLocaleTimeString("en-IN", { hour:"2-digit", minute:"2-digit" });
+    $("clockDate").textContent = now.toLocaleDateString("en-IN", { weekday:"short", day:"numeric", month:"short", year:"numeric" });
+    const h = now.getHours();
+    const part = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+    $("greetText").textContent = `${part}, ${myName()} 👋`;
+}
+updateClock();
+setInterval(updateClock, 30000);
+
+/* ====================== HERO SLIDER ====================== */
+const heroSlides = Array.from(document.querySelectorAll("#heroBanner .hero-slide"));
+const heroDots = $("heroDots");
+const heroBgs = Array.from(document.querySelectorAll("#heroBgs .hero-bg"));
+let heroIndex = 0, heroTimer = null;
+const HERO_DELAY = 6000;
+
+heroDots.innerHTML = heroSlides.map((_, i) => `<button type="button" aria-label="Go to slide ${i + 1}" class="${i === 0 ? "on" : ""}"></button>`).join("");
+
+function showHeroSlide(target) {
+    const next = (target + heroSlides.length) % heroSlides.length;
+    if (next === heroIndex) return;
+    const current = heroSlides[heroIndex], incoming = heroSlides[next];
+    current.classList.remove("active");
+    current.classList.add("exit");
+    incoming.classList.add("no-anim");
+    incoming.classList.remove("exit");
+    void incoming.offsetWidth;
+    incoming.classList.remove("no-anim");
+    incoming.classList.add("active");
+    heroBgs.forEach((bg, i) => bg.classList.toggle("on", i === next));
+    heroIndex = next;
+    heroDots.querySelectorAll("button").forEach((d, i) => d.classList.toggle("on", i === heroIndex));
+}
+function startHeroTimer() {
+    clearInterval(heroTimer);
+    heroTimer = setInterval(() => showHeroSlide(heroIndex + 1), HERO_DELAY);
+}
+heroDots.addEventListener("click", e => {
+    const dot = e.target.closest("button");
+    if (!dot) return;
+    showHeroSlide(Array.from(heroDots.children).indexOf(dot));
+    startHeroTimer();
+});
+$("heroBanner").addEventListener("mouseenter", () => clearInterval(heroTimer));
+$("heroBanner").addEventListener("mouseleave", startHeroTimer);
+startHeroTimer();
+
+/* ====================== HELPLINES ====================== */
+const HELPLINES = [
+    ["🆘","112","National Emergency"], ["👮","100","Police"], ["🚒","101","Fire"],
+    ["🚑","108","Ambulance"], ["🌊","1070","Disaster Helpline"], ["🛡️","1091","Women Helpline"]
+];
+const hlHTML = big => HELPLINES.map(([i, n, t]) =>
+    `<a class="hl ${big ? "big" : ""}" href="tel:${n}"><span class="i">${i}</span><span class="n">${n}</span><span class="t">${t}</span></a>`).join("");
+$("helplineMini").innerHTML = hlHTML(false);
+$("helplineGrid").innerHTML = hlHTML(true);
+
+/* ====================== STATE ====================== */
+const state = { requests:[], incidents:[], donations:[], commType:"all", commTerm:"", reqStatus:"all", reqTerm:"", reqError:false, donError:false };
+
+const idOf = item => item.id ?? item.request_id ?? "";
+const isMine = item => String(item.owner || item.email || "").trim().toLowerCase() === myEmail();
+const isClosed = item => ["resolved","completed","closed"].includes(String(item.status || "Pending").toLowerCase());
+
+function reqStage(item) {
+    const s = String(item.status || "Pending").toLowerCase();
+    const o = String(item.offer_status || "");
+    if (["resolved","completed"].includes(s) || o === "Helped") return 3;
+    if (o === "Approved" || s.includes("progress")) return 2;
+    if (o === "Offered") return 1;
+    return 0;
+}
+function donStage(d) {
+    const s = String(d.status || "").toLowerCase();
+    if (s.includes("picked") || s.includes("collect") || s.includes("complete")) return 2;
+    if (s.includes("schedul")) return 1;
+    return 0;
+}
+function timelineHTML(stage, labels) {
+    const max = labels.length - 1;
+    return `<div class="tl">${labels.map((l, i) => {
+        const done = i < stage || (stage === max && i === stage);
+        const now = i === stage && stage < max;
+        return `<div class="tl-step ${done ? "done" : ""} ${now ? "now" : ""}"><i>${done ? "✓" : i + 1}</i>${l}</div>`;
+    }).join("")}</div>`;
+}
+
+/* ====================== LOADERS ====================== */
+async function loadRequests() {
+    try {
+        /* Fetch all community requests so user can see and help other users' requests */
+        const data = await fetchJSON("/api/requests?scope=all");
+        state.requests = getArray(data, ["requests", "data", "items"]);
+        state.reqError = false;
+    } catch (err) {
+        console.error("Could not load requests:", err);
+        state.reqError = true;
+    }
+    renderCommunity(); renderMyRequests(); renderStats(); renderPreviews(); renderNotifications();
+}
+
+async function loadDonations() {
+    try {
+        const data = await fetchJSON("/api/donations?donor_email=" + encodeURIComponent(myEmail()));
+        state.donations = getArray(data, ["donations", "data", "items"]).filter(item =>
+            String(item.donor_email || item.email || "").trim().toLowerCase() === myEmail());
+        state.donError = false;
+    } catch (err) {
+        console.error("Could not load donations:", err);
+        state.donError = true;
+    }
+    renderDonations(); renderStats(); renderNotifications();
+}
+
+/* ====================== STATS / BADGES ====================== */
+function renderStats() {
+    const mine = state.requests.filter(isMine);
+    const resolved = mine.filter(i => reqStage(i) === 3).length;
+    animateCount($("userTotal"), mine.length);
+    animateCount($("userProgress"), mine.length - resolved);
+    animateCount($("userResolved"), resolved);
+    animateCount($("userDonated"), state.donations.length);
+    $("badgeRequests").textContent = mine.length - resolved;
+    $("badgeDonations").textContent = state.donations.length;
+    $("badgeCommunity").textContent = state.requests.filter(i => !isMine(i) && !isClosed(i)).length + state.incidents.length;
+}
+
+/* ====================== COMMUNITY REQUESTS ====================== */
+function helpActionHTML(item) {
+    const id = escapeHTML(idOf(item));
+    const type = escapeHTML(item.type || item.category || "Emergency support");
+    const offerStatus = item.offer_status || "";
+    const helper = String(item.helper_email || "").trim().toLowerCase();
+
+    if (helper === myEmail()) {
+        if (offerStatus === "Offered") {
+            return `<button class="mini-btn wait" type="button" disabled>⏳ Processing (Awaiting Volunteer Proceed)...</button>`;
+        }
+        if (offerStatus === "Approved" || item.status === "In Progress") {
+            return `<div class="confirm-box" style="width:100%;margin:0;"><b>Volunteer approved! Did you provide help?</b>
+                <div class="item-actions" style="margin:0;">
+                    <button class="mini-btn yes" type="button" data-confirm-id="${id}" data-choice="Helped">✓ Helped</button>
+                    <button class="mini-btn no" type="button" data-confirm-id="${id}" data-choice="Not Helped">✕ Not Helped</button>
+                </div></div>`;
+        }
+        return "";
+    }
+    if (offerStatus === "Offered") return `<button class="mini-btn" type="button" disabled>⚡ Another member offered</button>`;
+    if (offerStatus === "Approved" || item.status === "In Progress") return `<button class="mini-btn" type="button" disabled>✓ In progress with helper</button>`;
+    return `<button class="mini-btn" type="button" data-help-id="${id}" data-help-type="${type}">🤝 I Can Help</button>`;
+}
+
+function renderCommunity() {
+    const list = $("communityHelpList");
+    if (state.reqError) { list.innerHTML = '<div class="empty">Unable to load requests. Check that the Flask backend is running.</div>'; return; }
+
+    const term = state.commTerm;
+    const open = state.requests.filter(i => !isMine(i) && !isClosed(i)).filter(i => {
+        const type = i.type || i.category || "";
+        if (state.commType !== "all" && type !== state.commType) return false;
+        if (!term) return true;
+        return [type, i.location, i.details, i.description, i.priority, i.name].join(" ").toLowerCase().includes(term);
+    });
+
+    if (!open.length) { list.innerHTML = '<div class="empty">No open community requests match right now. 🎉</div>'; return; }
+
+    list.innerHTML = open.slice(0, 30).map(item => {
+        const id = escapeHTML(idOf(item));
+        const type = item.type || item.category || "Emergency support";
+        const priority = item.priority || "Normal";
+        const desc = item.details || item.description || "A community member has requested assistance.";
+        const requesterName = item.name ? ` • Requested by ${escapeHTML(item.name)}` : "";
+        return `<article class="item">
+            <div class="item-top">
+                <div class="item-ico">${iconFor(type)}</div>
+                <div class="item-main"><h4>${escapeHTML(type)} Request</h4><div class="sub">#RL-${id}${requesterName}</div></div>
+                <span class="pill ${escapeHTML(priority)}">${escapeHTML(priority)}</span>
+            </div>
+            <div class="loc">📍 ${formatLocationDisplay(item.location)}</div>
+            <p>${escapeHTML(desc)}</p>
+            <div class="item-actions">
+                ${helpActionHTML(item)}
+                <button class="mini-btn sec" type="button" data-request-details="${id}">View Request</button>
+            </div>
+        </article>`;
+    }).join("");
+}
+
+$("refreshHelpRequests").addEventListener("click", async () => {
+    const btn = $("refreshHelpRequests"); btn.disabled = true;
+    await loadRequests(); btn.disabled = false; toast("Community requests refreshed.", "info");
+});
+$("commSearch").addEventListener("input", e => { state.commTerm = e.target.value.trim().toLowerCase(); renderCommunity(); });
+$("commChips").addEventListener("click", e => {
+    const chip = e.target.closest("[data-ctype]"); if (!chip) return;
+    state.commType = chip.dataset.ctype;
+    $("commChips").querySelectorAll(".chip").forEach(c => c.classList.toggle("active", c === chip));
+    renderCommunity();
+});
+
+/* ====================== MY REQUESTS ====================== */
+function renderMyRequests() {
+    const list = $("myRequestsList");
+    const mine = state.requests.filter(isMine).slice().sort((a, b) => Number(idOf(b)) - Number(idOf(a)));
+
+    const stages = mine.map(reqStage);
+    $("rcAll").textContent = mine.length;
+    $("rcPending").textContent = stages.filter(s => s <= 1).length;
+    $("rcProgress").textContent = stages.filter(s => s === 2).length;
+    $("rcResolved").textContent = stages.filter(s => s === 3).length;
+
+    if (state.reqError) { list.innerHTML = '<div class="empty">Unable to load requests.</div>'; return; }
+    if (!mine.length) { list.innerHTML = '<div class="empty">You have not submitted any requests yet. Use the form to ask for help.</div>'; return; }
+
+    const filtered = mine.filter(item => {
+        const stage = reqStage(item);
+        const ok = state.reqStatus === "all" ||
+            (state.reqStatus === "pending" && stage <= 1) ||
+            (state.reqStatus === "progress" && stage === 2) ||
+            (state.reqStatus === "resolved" && stage === 3);
+        if (!ok) return false;
+        if (!state.reqTerm) return true;
+        return [idOf(item), item.type || item.category, item.location, item.priority, item.status].join(" ").toLowerCase().includes(state.reqTerm);
+    });
+
+    if (!filtered.length) { list.innerHTML = '<div class="empty">No matching requests.</div>'; return; }
+
+    list.innerHTML = filtered.slice(0, 40).map(item => {
+        const id = escapeHTML(idOf(item));
+        const type = item.type || item.category || "Support";
+        const priority = item.priority || "Medium";
+        const status = item.status || "Pending";
+        const stage = reqStage(item);
+        const offerStatus = item.offer_status || "";
+        const desc = item.details || item.description || "";
+
+        let extra = "";
+        if (stage === 2) {
+            extra = `<div class="confirm-box"><b>Did the volunteer/helper provide help?</b>
+                <div class="item-actions" style="margin:0;">
+                    <button class="mini-btn yes" type="button" data-confirm-id="${id}" data-choice="Helped">✓ Helped</button>
+                    <button class="mini-btn no" type="button" data-confirm-id="${id}" data-choice="Not Helped">✕ Not Helped</button>
+                </div></div>`;
+        } else if (offerStatus === "Not Helped") {
+            extra = `<div class="pickup-msg" style="background:#fdecea;color:#c43b2d;">✕ Marked as "Not Helped". The request is open again.</div>`;
+        }
+
+        let emailInfo = emailPillHTML("request", idOf(item), item, "Receipt email");
+        if (item.offer_email_sent === true && (stage === 1 || stage === 2)) {
+            emailInfo += emailNoteHTML("✉️ A helper offered assistance. An email alert was sent to your address.");
+        }
+
+        return `<article class="item">
+            <div class="item-top">
+                <div class="item-ico">${iconFor(type)}</div>
+                <div class="item-main"><h4>${escapeHTML(type)}</h4><div class="sub">#RL-${id}</div></div>
+                <span class="pill ${escapeHTML(priority)}">${escapeHTML(priority)}</span>
+                <span class="status ${statusClass(status)}">${escapeHTML(status)}</span>
+            </div>
+            <div class="loc">📍 ${formatLocationDisplay(item.location)}</div>
+            ${desc ? `<p>${escapeHTML(desc)}</p>` : ""}
+            ${timelineHTML(stage, ["Submitted", "Helper offered", "In progress", "Resolved"])}
+            ${extra}
+            ${emailInfo}
+        </article>`;
+    }).join("");
+}
+
+$("requestSearch").addEventListener("input", e => { state.reqTerm = e.target.value.trim().toLowerCase(); renderMyRequests(); });
+$("reqChips").addEventListener("click", e => {
+    const chip = e.target.closest("[data-rstatus]"); if (!chip) return;
+    state.reqStatus = chip.dataset.rstatus;
+    $("reqChips").querySelectorAll(".chip").forEach(c => c.classList.toggle("active", c === chip));
+    renderMyRequests();
+});
+
+/* ====================== DONATIONS LIST ====================== */
+function renderDonations() {
+    const list = $("userDonationsList");
+    if (state.donError) { list.innerHTML = '<div class="empty">Unable to load donation items.</div>'; return; }
+    if (!state.donations.length) { list.innerHTML = '<div class="empty">You have not submitted any item donations yet. Your generosity can help someone today. 💛</div>'; return; }
+
+    list.innerHTML = state.donations.map(d => {
+        const stage = donStage(d);
+
+        let emailInfo = emailPillHTML("donation", idOf(d), d, "Donation receipt");
+        if (d.pickup_message && d.pickup_email_sent === true) {
+            emailInfo += emailNoteHTML("✉️ The pickup details were also emailed to you.");
+        }
+
+        return `<article class="item">
+            <div class="item-top">
+                <div class="item-ico">${iconFor(d.item_category)}</div>
+                <div class="item-main"><h4>${escapeHTML(d.item_category || "Donation")}</h4><div class="sub">${escapeHTML(d.item_details || "")}</div></div>
+                <span class="status ${statusClass(d.status)}">${escapeHTML(d.status || "Available")}</span>
+            </div>
+            <div class="loc">📍 ${formatLocationDisplay(d.location)}</div>
+            ${timelineHTML(stage, ["Submitted", "Pickup scheduled", "Picked up"])}
+            ${d.pickup_message
+                ? `<div class="pickup-msg">💬 "${escapeHTML(d.pickup_message)}"<small>Volunteer: ${escapeHTML(d.assigned_volunteer || "ReliefLink Volunteer")}</small></div>`
+                : `<div class="loc" style="margin-top:10px;font-style:italic;">Waiting for a volunteer to schedule pickup...</div>`}
+            ${emailInfo}
+        </article>`;
+    }).join("");
+}
+
+/* ====================== INCIDENTS ====================== */
+let incIndex = 0, incTimer = null;
+
+function showIncident(i) {
+    const cards = $("incidentList").querySelectorAll(".incident-card");
+    if (!cards.length) return;
+    incIndex = (i + cards.length) % cards.length;
+    cards.forEach((c, n) => c.classList.toggle("on", n === incIndex));
+    $("incidentSlideCounter").textContent = `${incIndex + 1} / ${cards.length}`;
+}
+function startIncidentTimer() {
+    clearInterval(incTimer);
+    incTimer = setInterval(() => { if ($("incidentList").querySelectorAll(".incident-card").length > 1) showIncident(incIndex + 1); }, 5000);
+}
+$("previousIncident").addEventListener("click", () => { showIncident(incIndex - 1); startIncidentTimer(); });
+$("nextIncident").addEventListener("click", () => { showIncident(incIndex + 1); startIncidentTimer(); });
+
+async function loadIncidents() {
+    const list = $("incidentList"), refresh = $("refreshIncidents");
+    refresh.disabled = true; refresh.textContent = "Loading...";
+    clearInterval(incTimer);
+
+    try {
+        const data = await fetchJSON("/api/incidents");
+        state.incidents = getArray(data, ["incidents", "alerts"]);
+        $("incidentCount").textContent = state.incidents.length + " ALERTS";
+
+        if (!state.incidents.length) {
+            list.innerHTML = '<div class="empty">No incident alerts at the moment. Stay safe! 🌿</div>';
+            $("incidentControls").style.display = "none";
+        } else {
+            list.innerHTML = state.incidents.slice(0, 8).map(item => {
+                const category = item.category || "Community Alert";
+                const title = item.title || item.category || "Emergency Alert";
+                const description = item.description || "Please follow local emergency guidance.";
+                const reporter = item.posted_by || item.reporter || "ReliefLink Community";
+                const filename = item.image_filename || "";
+                const imageUrl = item.image_url || item.image || item.image_path ||
+                    (filename ? "/api/incidents/uploads/" + encodeURIComponent(filename) : "");
+                const image = imageUrl
+                    ? `<img class="incident-image" src="${escapeHTML(imageUrl)}" alt="${escapeHTML(title)}" loading="lazy">` : "";
+                return `<article class="incident-card">
+                    ${image}
+                    <span class="tag">${escapeHTML(category)}</span>
+                    <h3>${escapeHTML(title)}</h3>
+                    <p>${escapeHTML(description)}</p>
+                    <div class="meta">📍 ${formatLocationDisplay(item.location)}<br>Posted by ${escapeHTML(reporter)}</div>
+                </article>`;
+            }).join("");
+            list.querySelectorAll("img.incident-image").forEach(img => img.addEventListener("error", () => img.classList.add("image-missing")));
+            $("incidentControls").style.display = "flex";
+            showIncident(0);
+            startIncidentTimer();
+        }
+    } catch (err) {
+        console.error("Could not load incidents:", err);
+        state.incidents = [];
+        $("incidentCount").textContent = "— ALERTS";
+        list.innerHTML = '<div class="empty">Unable to load incident alerts.</div>';
+        $("incidentControls").style.display = "none";
+    } finally {
+        refresh.disabled = false; refresh.textContent = "↻ Refresh";
+        renderPreviews(); renderStats(); renderNotifications();
+    }
+}
+$("refreshIncidents").addEventListener("click", loadIncidents);
+
+/* ====================== OVERVIEW PREVIEWS ====================== */
+function renderPreviews() {
+    const inc = state.incidents.slice(0, 3);
+    $("pvIncidents").innerHTML = inc.length
+        ? inc.map(i => `<button type="button" class="pv" data-goto="community"><div class="pi">🚨</div><div><b>${escapeHTML(i.title || i.category || "Emergency Alert")}</b><small>📍 ${escapeHTML(i.location || "Location not specified")}</small></div></button>`).join("")
+        : '<div class="empty">No incident alerts right now.</div>';
+
+    const open = state.requests.filter(i => !isMine(i) && !isClosed(i)).slice(0, 3);
+    $("pvRequests").innerHTML = open.length
+        ? open.map(i => { const t = i.type || i.category || "Emergency support"; return `<button type="button" class="pv" data-goto="community"><div class="pi">${iconFor(t)}</div><div><b>${escapeHTML(t)} • ${escapeHTML(i.priority || "Normal")}</b><small>📍 ${escapeHTML(i.location || "Location not specified")}</small></div></button>`; }).join("")
+        : '<div class="empty">No open community requests right now.</div>';
+}
+
+/* ====================== NOTIFICATIONS ====================== */
+let lastNotifCount = null;
+
+function renderNotifications() {
+    const items = [];
+    const me = myEmail();
+
+    state.requests.forEach(item => {
+        const id = idOf(item);
+        const stage = reqStage(item);
+        if (isMine(item)) {
+            if (stage === 1) items.push(["🙋", `Someone offered to help with your request #RL-${id}. Waiting for volunteer approval.` + (item.offer_email_sent === true ? " An email alert was sent to you." : ""), "requests"]);
+            if (stage === 2) items.push(["✅", `Help is on the way for #RL-${id}. Please confirm when you receive it.`, "requests"]);
+        } else if (String(item.helper_email || "").trim().toLowerCase() === me && stage === 2) {
+            items.push(["🤝", `Your offer for #RL-${id} was approved. Confirm once you have helped.`, "community"]);
+        }
+    });
+    state.donations.forEach(d => {
+        if (donStage(d) === 1) items.push(["📦", `Pickup scheduled for your ${d.item_category || "donation"}.` + (d.pickup_email_sent === true ? " Details were emailed to you." : ""), "donations"]);
+    });
+
+    const dot = $("bellDot");
+    dot.textContent = items.length;
+    dot.classList.toggle("show", items.length > 0);
+
+    $("notifPop").innerHTML = `<h4>Notifications</h4>` + (items.length
+        ? items.slice(0, 8).map(([ic, tx, go]) => `<button type="button" class="notif-item" data-goto="${go}"><span class="ni">${ic}</span><span>${escapeHTML(tx)}</span></button>`).join("")
+        : '<div class="notif-empty">You are all caught up. 🎉</div>');
+
+    if (lastNotifCount !== null && items.length > lastNotifCount) toast("You have a new update. Check the bell 🔔", "info");
+    lastNotifCount = items.length;
+}
+$("bellBtn").addEventListener("click", e => { e.stopPropagation(); $("notifPop").classList.toggle("open"); });
+
+/* ====================== MODALS ====================== */
+function openModal(id) { $(id).classList.add("active"); $(id).setAttribute("aria-hidden", "false"); }
+function closeModal(id) { $(id).classList.remove("active"); $(id).setAttribute("aria-hidden", "true"); }
+
+function showRequestDetails(id) {
+    const item = state.requests.find(r => String(idOf(r)) === String(id));
+    $("infoTitle").textContent = "Request #RL-" + id;
+    if (!item) { $("infoBody").innerHTML = '<div class="empty">Request not found.</div>'; openModal("infoModal"); return; }
+    const type = item.type || item.category || "Support";
+    $("infoBody").innerHTML = `<dl class="kv">
+        <dt>Type</dt><dd>${iconFor(type)} ${escapeHTML(type)}</dd>
+        <dt>Priority</dt><dd>${escapeHTML(item.priority || "Normal")}</dd>
+        <dt>Status</dt><dd>${escapeHTML(item.status || "Pending")}</dd>
+        <dt>Location</dt><dd>${formatLocationDisplay(item.location)}</dd>
+        <dt>Description</dt><dd>${escapeHTML(item.details || item.description || "—")}</dd>
+    </dl>
+    <p class="form-note">For privacy, requester contact details are not shown. Volunteer coordinators arrange direct support.</p>`;
+    openModal("infoModal");
+}
+
+/* ====================== ACTIONS ====================== */
+async function offerHelp(id, btn) {
+    try {
+        btn.disabled = true; btn.textContent = "⏳ Processing...";
+        const result = await fetchJSON(`/api/requests/${id}/offers`, {
+            method:"POST", headers:{ "Content-Type":"application/json" },
+            body:JSON.stringify({ helper_email:myEmail(), helper_name:myName() })
+        });
+        let msg = result.message || "Thank you! Your offer was sent to the volunteer for approval.";
+        if (result.email_sent === true) msg += " The requester was notified by email.";
+        else if (result.email_sent === false) msg += " The email notification could not be sent.";
+        toast(msg, "success");
+        await loadRequests();
+    } catch (err) {
+        toast(err.message || "Failed to submit help offer.", "error");
+        btn.disabled = false; btn.textContent = "🤝 I Can Help";
+        loadRequests();
+    }
+}
+
+async function sendConfirmation(id, choice, btn) {
+    try {
+        btn.disabled = true;
+        await fetchJSON(`/api/requests/${id}`, {
+            method:"PATCH", headers:{ "Content-Type":"application/json" },
+            body:JSON.stringify({ confirmation:choice })
+        });
+        toast(choice === "Helped" ? "Thank you! Marked as helped." : "Noted. The request is open again.", "success");
+        await loadRequests();
+    } catch (err) {
+        toast(err.message || "Failed to update confirmation.", "error");
+        btn.disabled = false;
+    }
+}
+
+async function resendReceipt(kind, id, btn) {
+    const url = kind === "donation"
+        ? `/api/donations/${encodeURIComponent(id)}/resend-receipt`
+        : `/api/requests/${encodeURIComponent(id)}/resend-receipt`;
+    const original = btn.textContent;
+
+    try {
+        btn.disabled = true; btn.textContent = "Sending...";
+        const result = await fetchJSON(url, {
+            method:"POST", headers:{ "Content-Type":"application/json" },
+            body:JSON.stringify({ email:myEmail() })
+        });
+        if (result.email_sent === false) {
+            toast(result.message || "The email could not be sent. Please try again later.", "error");
+        } else {
+            toast(result.message || ("Receipt email sent to " + (result.email_to || myEmail()) + "."), "success");
+        }
+        if (kind === "donation") await loadDonations(); else await loadRequests();
+    } catch (err) {
+        toast(err.message || "Could not resend the email.", "error");
+        btn.disabled = false; btn.textContent = original;
+    }
+}
+
+document.addEventListener("click", e => {
+    const t = e.target;
+
+    const goto = t.closest("[data-goto]");
+    if (goto) {
+        showView(goto.dataset.goto);
+        if (goto.dataset.focus) setTimeout(() => $("requestType")?.closest(".field")?.scrollIntoView({ behavior:"smooth", block:"center" }), 350);
+        return;
+    }
+
+    const help = t.closest("[data-help-id]");
+    if (help && !help.disabled) { offerHelp(help.dataset.helpId, help); return; }
+
+    const conf = t.closest("[data-confirm-id]");
+    if (conf && !conf.disabled) { sendConfirmation(conf.dataset.confirmId, conf.dataset.choice, conf); return; }
+
+    const resend = t.closest("[data-resend-id]");
+    if (resend && !resend.disabled) { resendReceipt(resend.dataset.resendKind, resend.dataset.resendId, resend); return; }
+
+    const view = t.closest("[data-request-details]");
+    if (view) { showRequestDetails(view.dataset.requestDetails); return; }
+
+    const closer = t.closest("[data-close]");
+    if (closer) { closeModal(closer.dataset.close); return; }
+
+    if (!t.closest(".bell-wrap")) $("notifPop").classList.remove("open");
+
+    if (t.classList && t.classList.contains("modal")) closeModal(t.id);
+});
+
+document.addEventListener("keydown", e => {
+    if (e.key === "Escape") {
+        ["infoModal", "qrModal", "locationPermissionModal"].forEach(closeModal);
+        $("notifPop").classList.remove("open");
+        closeSidebar();
+    }
+});
+
+/* ====================== FORM CHIP / SEGMENT PICKERS ====================== */
+document.querySelectorAll("[data-target]").forEach(group => {
+    group.addEventListener("click", e => {
+        const b = e.target.closest("[data-val]");
+        if (!b) return;
+        group.querySelectorAll("[data-val]").forEach(x => x.classList.toggle("sel", x === b));
+        $(group.dataset.target).value = b.dataset.val;
+    });
+});
+function clearPickers(form) {
+    form.querySelectorAll("[data-target]").forEach(g => {
+        g.querySelectorAll("[data-val]").forEach((x, idx) => x.classList.toggle("sel", idx === 0));
+        const first = g.querySelector("[data-val]");
+        $(g.dataset.target).value = first ? first.dataset.val : "";
+    });
+}
+$("details").addEventListener("input", e => { $("detailsCount").textContent = e.target.value.length; });
+
+/* ====================== GPS & MAP INTEGRATION ====================== */
+let activeGpsTarget = null;
+
+function applyDetectedCoordinates(lat, lng, label = "Location") {
+    if (!activeGpsTarget) return;
+    const { input, btn, original } = activeGpsTarget;
+    input.value = `${lat}, ${lng}`;
+    btn.disabled = false;
+    btn.textContent = `✓ ${label} Detected`;
+
+    const mapContainer = $("mapPreview");
+    if (mapContainer && input.id === "location") {
+        mapContainer.style.display = "block";
+        mapContainer.innerHTML = `<iframe width="100%" height="100%" style="border:0;" loading="lazy" src="https://maps.google.com/maps?q=${lat},${lng}&z=15&output=embed"></iframe>`;
+    }
+
+    setTimeout(() => { btn.textContent = original; }, 3000);
+}
+
+async function fallbackIpLocation() {
+    try {
+        const res = await fetch("https://ipapi.co/json/");
+        const data = await res.json();
+        if (data && data.latitude && data.longitude) {
+            const lat = Number(data.latitude).toFixed(6);
+            const lng = Number(data.longitude).toFixed(6);
+            applyDetectedCoordinates(lat, lng, "Area");
+            toast(`Approximate area detected (${data.city || "Nearby"}). You can refine the landmark if needed.`, "info");
+            return true;
+        }
+    } catch (e) {
+        console.warn("IP location fallback failed:", e);
+    }
+    return false;
+}
+
+function triggerBrowserGps() {
+    if (!activeGpsTarget) return;
+    const { input, btn, original } = activeGpsTarget;
+    btn.disabled = true;
+    btn.textContent = "📍 Locating...";
+
+    if (!navigator.geolocation) {
+        fallbackIpLocation().then(ok => {
+            if (!ok) {
+                btn.disabled = false;
+                btn.textContent = original;
+                toast("Geolocation is not supported. Please enter your landmark manually.", "error");
+                input.focus();
+            }
+        });
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            const lat = pos.coords.latitude.toFixed(6);
+            const lng = pos.coords.longitude.toFixed(6);
+            applyDetectedCoordinates(lat, lng, "Location");
+            toast("Current location detected!", "success");
+        },
+        async error => {
+            const recovered = await fallbackIpLocation();
+            if (!recovered) {
+                btn.disabled = false;
+                btn.textContent = original;
+                if (!window.isSecureContext) {
+                    toast("Browser blocks exact GPS on HTTP. Enter landmark manually or enable HTTPS.", "error");
+                } else if (error.code === error.PERMISSION_DENIED) {
+                    toast("Permission was blocked in browser settings. Click the lock/info icon in the address bar to allow Location.", "error");
+                } else {
+                    toast("Location unavailable. Please enter landmark manually.", "error");
+                }
+                input.focus();
+            }
+        },
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+    );
+}
+
+async function requestGpsPrompt(targetInputId, targetBtnId) {
+    const btn = $(targetBtnId);
+    activeGpsTarget = {
+        input: $(targetInputId),
+        btn: btn,
+        original: btn.textContent
+    };
+
+    if (window.isSecureContext && navigator.permissions && navigator.permissions.query) {
+        try {
+            const status = await navigator.permissions.query({ name: "geolocation" });
+            if (status.state === "granted") {
+                triggerBrowserGps();
+                return;
+            }
+        } catch (e) {}
+    }
+
+    openModal("locationPermissionModal");
+}
+
+$("denyLocationModalBtn").addEventListener("click", () => {
+    closeModal("locationPermissionModal");
+    toast("Please enter your landmark or area manually.", "info");
+    if (activeGpsTarget && activeGpsTarget.input) {
+        activeGpsTarget.input.focus();
+    }
+});
+
+$("confirmLocationModalBtn").addEventListener("click", () => {
+    closeModal("locationPermissionModal");
+    triggerBrowserGps();
+});
+
+$("getGpsBtn").addEventListener("click", () => requestGpsPrompt("location", "getGpsBtn"));
+$("getDonationGpsBtn").addEventListener("click", () => requestGpsPrompt("donationLocation", "getDonationGpsBtn"));
+/* ====================== SUBMIT REQUEST ====================== */
+$("requestForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const button = form.querySelector('button[type="submit"]');
+    const message = $("requestFormMessage");
+
+    let type = $("requestType").value.trim();
+    if (!type) {
+        const sel = form.querySelector('[data-target="requestType"] .sel');
+        type = sel ? sel.dataset.val : "Food";
+        $("requestType").value = type;
+    }
+
+    let priority = $("priority").value.trim();
+    if (!priority) {
+        const sel = form.querySelector('[data-target="priority"] .sel');
+        priority = sel ? sel.dataset.val : "Medium";
+        $("priority").value = priority;
+    }
+
+    const location = $("location").value.trim();
+    const details = $("details").value.trim();
+
+    if (!type) { toast("Please choose what you need.", "error"); return; }
+    if (!priority) { toast("Please choose a priority.", "error"); return; }
+    if (!location) { toast("Please provide your location.", "error"); $("location").focus(); return; }
+    if (!details) { toast("Please enter your emergency details.", "error"); $("details").focus(); return; }
+
+    const payload = {
+        owner: myEmail(),
+        email: myEmail(),
+        name: myName(),
+        phone: session.phone || "",
+        pincode: session.pincode || "",
+        type: type,
+        category: type,
+        location: location,
+        priority: priority,
+        details: details,
+        description: details
+    };
+
+    button.disabled = true; button.textContent = "Submitting...";
+    message.textContent = "Sending your request...";
+
+    try {
+        const result = await fetchJSON("/api/requests", {
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            body:JSON.stringify(payload)
+        });
+        message.textContent = (result.message || "Emergency request submitted successfully!") + emailToastSuffix(result, myEmail());
+        toast(message.textContent, "success");
+        form.reset(); clearPickers(form); $("detailsCount").textContent = "0";
+        $("mapPreview").style.display = "none";
+        await loadRequests();
+    } catch (error) {
+        console.error("Emergency request failed:", error);
+        message.textContent = error.message || "Request failed. Check backend connection.";
+        toast(message.textContent, "error");
+    } finally {
+        button.disabled = false; button.textContent = "➤ Submit Emergency Request";
+    }
+});
+
+/* ====================== SUBMIT ITEM DONATION ====================== */
+$("donationForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const button = form.querySelector('button[type="submit"]');
+    const message = $("donationFormMessage");
+
+    let category = $("donationCategory").value.trim();
+    if (!category) {
+        const sel = form.querySelector('[data-target="donationCategory"] .sel');
+        category = sel ? sel.dataset.val : "Food";
+        $("donationCategory").value = category;
+    }
+
+    const quantity = $("donationQuantity").value.trim();
+    const location = $("donationLocation").value.trim();
+    const details = $("donationDetails").value.trim();
+
+    if (!category) { toast("Please choose an item category.", "error"); return; }
+    if (!location) { toast("Please specify a pickup location.", "error"); $("donationLocation").focus(); return; }
+    if (!details) { toast("Please describe the items you wish to donate.", "error"); $("donationDetails").focus(); return; }
+
+    const payload = {
+        donor_email: myEmail(),
+        donor_name: myName(),
+        category: category,
+        item_category: category,
+        location: location,
+        details: quantity ? `[Qty: ${quantity}] ${details}` : details,
+        item_details: quantity ? `[Qty: ${quantity}] ${details}` : details
+    };
+
+    button.disabled = true; button.textContent = "Submitting...";
+    message.textContent = "Sending your donation offer...";
+
+    try {
+        const result = await fetchJSON("/api/donations", {
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
+            body:JSON.stringify(payload)
+        });
+        message.textContent = (result.message || "Donation posted successfully! A volunteer will review it.") + emailToastSuffix(result, payload.donor_email);
+        toast(message.textContent, "success");
+        form.reset(); clearPickers(form);
+        await loadDonations();
+    } catch (error) {
+        console.error("Donation submit failed:", error);
+        message.textContent = error.message || "Failed to submit donation.";
+        toast(message.textContent, "error");
+    } finally {
+        button.disabled = false; button.textContent = "🎁 Submit Item Donation";
+    }
+});
+
+/* ====================== SAFETY TIPS ====================== */
+const safetyTips = [
+    { title:"Build an emergency kit", text:"Keep drinking water, dry food, a torch, a power bank, first-aid supplies and copies of key documents in one easy-to-grab bag." },
+    { title:"Know your exits", text:"Learn the safest route out of your home and your nearest relief shelter before an emergency happens, and share the plan with your family." },
+    { title:"During heavy rain and floods", text:"Avoid walking or driving through moving water. Move to higher ground early and switch off electricity at the mains if water is entering your home." },
+    { title:"Save key numbers offline", text:"Write down 112, your local hospital and two family contacts on paper. Phones can run out of battery or lose network." },
+    { title:"Give accurate details", text:"When you request help, share your exact location, the type of help you need and how many people are affected so volunteers can respond faster." },
+    { title:"Check on your neighbours", text:"Elderly people, children and people with disabilities may need extra help. A quick check can save a life." }
+];
+let tipIndex = 0, tipTimer = null;
+
+function showTip(index, animate = true) {
+    tipIndex = (index + safetyTips.length) % safetyTips.length;
+    const text = $("tipText");
+    const apply = () => {
+        $("tipTitle").textContent = safetyTips[tipIndex].title;
+        text.textContent = safetyTips[tipIndex].text;
+        text.classList.remove("fade");
+        $("tipDots").innerHTML = safetyTips.map((_, i) => `<i class="${i === tipIndex ? "on" : ""}"></i>`).join("");
+    };
+    if (animate) { text.classList.add("fade"); setTimeout(apply, 220); } else apply();
+}
+function startTipTimer() { clearInterval(tipTimer); tipTimer = setInterval(() => showTip(tipIndex + 1), 7000); }
+$("tipPrev").addEventListener("click", () => { showTip(tipIndex - 1); startTipTimer(); });
+$("tipNext").addEventListener("click", () => { showTip(tipIndex + 1); startTipTimer(); });
+showTip(0, false); startTipTimer();
+
+$("tipsGrid").innerHTML = safetyTips.map((t, i) =>
+    `<div class="tip-mini"><div class="n">${i + 1}</div><div><b>${escapeHTML(t.title)}</b><span>${escapeHTML(t.text)}</span></div></div>`).join("");
+
+/* ====================== EMERGENCY KIT CHECKLIST ====================== */
+const KIT_ITEMS = [
+    "Drinking water (3 litres per person per day)", "Dry food and snacks", "Torch and spare batteries",
+    "Power bank and charger", "First-aid kit and regular medicines", "Copies of important documents",
+    "Whistle, blanket and raincoat", "Cash in small notes"
+];
+const KIT_KEY = "rl_kit_" + myEmail();
+let kitDone = [];
+try { kitDone = JSON.parse(localStorage.getItem(KIT_KEY) || "[]"); } catch (e) { kitDone = []; }
+
+function renderKit() {
+    $("kitList").innerHTML = KIT_ITEMS.map((label, i) =>
+        `<label class="kit-item ${kitDone.includes(i) ? "done" : ""}"><input type="checkbox" data-kit="${i}" ${kitDone.includes(i) ? "checked" : ""}><span>${escapeHTML(label)}</span></label>`).join("");
+    const pct = Math.round(kitDone.length / KIT_ITEMS.length * 100);
+    $("kitBar").style.width = pct + "%";
+    $("kitPercent").textContent = pct + "%";
+}
+$("kitList").addEventListener("change", e => {
+    const cb = e.target.closest("[data-kit]"); if (!cb) return;
+    const i = Number(cb.dataset.kit);
+    kitDone = cb.checked ? Array.from(new Set([...kitDone, i])) : kitDone.filter(x => x !== i);
+    try { localStorage.setItem(KIT_KEY, JSON.stringify(kitDone)); } catch (err) {}
+    renderKit();
+    if (kitDone.length === KIT_ITEMS.length) toast("Your emergency kit is fully packed. Well done! 🎒", "success");
+});
+renderKit();
+
+/* ====================== UPI QR DONATION ====================== */
+const UPI_ID = "asiyadh786@oksbi";
+const PAYEE_NAME = "ReliefLink Foundation";
+let selectedDonationAmount = 250;
+const amtButtons = document.querySelectorAll(".amt");
+const donateButton = $("donateButton");
+
+function setAmount(n, fromChip) {
+    selectedDonationAmount = n;
+    donateButton.textContent = "♡ Donate ₹" + n.toLocaleString("en-IN");
+    amtButtons.forEach(b => b.classList.toggle("active", fromChip && Number(b.dataset.amount) === n));
+    if (fromChip) $("customAmount").value = "";
+}
+amtButtons.forEach(b => b.addEventListener("click", () => setAmount(Number(b.dataset.amount) || 250, true)));
+$("customAmount").addEventListener("input", e => {
+    const n = Math.floor(Number(e.target.value));
+    if (n >= 1) setAmount(n, false);
+    else amtButtons.forEach(b => b.classList.remove("active"));
+});
+
+const upiLink = amount => `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${amount}&cu=INR&tn=${encodeURIComponent("ReliefLink Emergency Donation")}`;
+
+function showUpiQr(amount) {
+    if (!(amount >= 1)) { toast("Please enter a valid amount.", "error"); return; }
+    $("qrModalAmountBadge").textContent = "₹" + amount.toLocaleString("en-IN");
+    $("qrTarget").innerHTML = "";
+    const link = upiLink(amount);
+    if (typeof QRCode === "function") {
+        new QRCode($("qrTarget"), { text:link, width:180, height:180, colorDark:"#092d46", colorLight:"#ffffff", correctLevel:QRCode.CorrectLevel.M });
+    } else {
+        $("qrTarget").textContent = "QR library could not load. Use the UPI button below.";
+    }
+    $("openUpiBtn").href = link;
+    openModal("qrModal");
+}
+donateButton.addEventListener("click", () => showUpiQr(selectedDonationAmount));
+$("qaMoney").addEventListener("click", () => showUpiQr(selectedDonationAmount));
+$("closeQrModal").addEventListener("click", () => closeModal("qrModal"));
+$("copyUpiBtn").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(UPI_ID); toast("UPI ID copied: " + UPI_ID, "success"); }
+    catch (e) { toast("UPI ID: " + UPI_ID, "info"); }
+});
+
+/* ====================== BOOT + LIVE REFRESH ====================== */
+loadRequests();
+loadIncidents();
+loadDonations();
+
+setInterval(() => {
+    if (document.hidden) return;
+    loadRequests();
+    loadDonations();
+}, 20000);
+</script>
+</body>
+</html>

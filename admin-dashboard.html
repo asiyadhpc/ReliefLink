@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReliefLink | Administrator Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --navy:#092d46;
+    --teal:#079b91;
+    --bg:#f1f6fb;
+    --text:#183650;
+    --muted:#72869b;
+    --border:#e3edf5;
+    --shadow:0 6px 22px rgba(9,45,70,.07);
+}
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body { margin:0; font-family:Inter,sans-serif; color:var(--text); background:
+    radial-gradient(circle at top left,#e3f6f3 0,transparent 35%),
+    radial-gradient(circle at bottom right,#e6eefb 0,transparent 35%),
+    var(--bg);
+    background-attachment:fixed; }
+button,input,select,textarea { font:inherit; }
+button { cursor:pointer; }
+
+/* ===== TOP HEADER ===== */
+.topbar {
+    position:sticky; top:0; z-index:20; overflow:hidden;
+    display:flex; align-items:center; justify-content:space-between; gap:15px;
+    padding:16px 36px;
+    background:
+        radial-gradient(circle at 12% 0%,rgba(32,212,197,.28),transparent 40%),
+        radial-gradient(circle at 92% 100%,rgba(40,119,219,.25),transparent 40%),
+        linear-gradient(100deg,#06243a,#08425a 55%,#07697a);
+    box-shadow:0 8px 28px rgba(6,36,58,.28);
+}
+.topbar::after {
+    content:""; position:absolute; left:0; right:0; bottom:0; height:3px;
+    background:linear-gradient(90deg,#20d4c5,#8ff7ec,#ffd98a,#20d4c5);
+}
+.rl-brand { display:flex; align-items:center; gap:13px; position:relative; z-index:1; text-decoration:none; }
+.rl-emblem { width:54px; height:54px; flex-shrink:0; display:block; filter:drop-shadow(0 6px 12px rgba(0,0,0,.3)); }
+.rl-brand-text { display:flex; flex-direction:column; justify-content:center; gap:6px; min-width:0; }
+.rl-brand-name {
+    display:block; margin:0; white-space:nowrap;
+    font-size:30px; font-weight:800; line-height:1; letter-spacing:-.8px;
+    background:linear-gradient(90deg,#ffffff,#b9fff6 60%,#ffe3a6);
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent; color:transparent;
+}
+.rl-brand-sub {
+    display:flex; align-items:center; gap:8px; white-space:nowrap;
+    font-size:10.5px; color:#b9e3ea; font-weight:700; letter-spacing:2.2px; text-transform:uppercase; line-height:1;
+}
+.rl-brand-sub::before { content:""; width:8px; height:8px; border-radius:50%; background:#3dffb0; animation:liveDot 1.8s infinite; }
+@keyframes liveDot {
+    0% { box-shadow:0 0 0 0 rgba(61,255,176,.7); }
+    70% { box-shadow:0 0 0 9px rgba(61,255,176,0); }
+    100% { box-shadow:0 0 0 0 rgba(61,255,176,0); }
+}
+
+.top-nav { display:flex; align-items:center; gap:6px; position:relative; z-index:1; flex-wrap:wrap; justify-content:center; }
+.top-nav a {
+    padding:9px 14px; border-radius:30px; color:#d6eef2; text-decoration:none;
+    font-size:12px; font-weight:700; letter-spacing:.2px; transition:.25s; white-space:nowrap;
+}
+.top-nav a:hover { background:rgba(255,255,255,.14); color:#fff; }
+
+.top-actions { display:flex; align-items:center; gap:14px; position:relative; z-index:1; }
+.clock { text-align:right; line-height:1.25; color:#fff; }
+.clock b { display:block; font-size:15px; font-weight:800; }
+.clock span { font-size:10.5px; color:#b9e3ea; }
+.server-badge { padding:6px 12px; border-radius:20px; font-size:11px; font-weight:700; white-space:nowrap; }
+.server-badge.online { background:rgba(16,185,129,.2); color:#34d399; border:1px solid #10b981; }
+.server-badge.offline { background:rgba(229,57,53,.2); color:#f87171; border:1px solid #ef4444; }
+.admin-name { color:#fff; font-size:12.5px; font-weight:700; text-align:right; line-height:1.3; }
+.admin-name small { display:block; color:#b9e3ea; font-size:10px; font-weight:600; letter-spacing:1.4px; text-transform:uppercase; }
+.nav-link, button.nav-link {
+    display:inline-flex; align-items:center; gap:8px; padding:11px 20px; border-radius:30px;
+    color:#fff; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.28);
+    backdrop-filter:blur(8px); text-decoration:none; font-size:12.5px; font-weight:700; letter-spacing:.3px; transition:.25s;
+}
+.nav-link:hover { background:linear-gradient(90deg,#e5543a,#f0793a); border-color:transparent; transform:translateY(-1px); box-shadow:0 8px 18px rgba(229,84,58,.4); }
+
+/* ===== PAGE ===== */
+.content { max-width:1500px; margin:auto; padding:24px 28px 70px; }
+section[id] { scroll-margin-top:100px; }
+
+/* ===== HERO ===== */
+.hero {
+    position:relative; overflow:hidden;
+    padding:42px 48px; border-radius:22px; color:white;
+    box-shadow:0 14px 36px rgba(9,45,70,.18);
+    background:linear-gradient(100deg,rgba(4,37,58,.97),rgba(5,62,78,.82),rgba(5,62,78,.35)),
+    url('https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&w=1500&q=85') center/cover;
+}
+.hero::after { content:""; position:absolute; right:-80px; top:-80px; width:300px; height:300px; border-radius:50%; background:radial-gradient(circle,rgba(32,212,197,.28),transparent 65%); pointer-events:none; }
+.hero-copy { position:relative; z-index:1; max-width:700px; }
+.hero-tag { display:inline-flex; align-items:center; gap:8px; padding:8px 14px; margin-bottom:16px; border:1px solid rgba(107,207,198,.7); background:rgba(5,151,140,.25); backdrop-filter:blur(4px); border-radius:20px; font-size:10px; font-weight:800; letter-spacing:1.6px; }
+.hero-tag::before { content:""; width:8px; height:8px; border-radius:50%; background:#3dffb0; animation:liveDot 1.8s infinite; }
+.hero h2 { margin:0; font-size:clamp(28px,4vw,44px); line-height:1.13; font-weight:800; letter-spacing:-1.2px; text-shadow:0 3px 18px rgba(0,0,0,.3); }
+.hero h2 span { display:inline-block; margin-top:4px; background:linear-gradient(90deg,#20d4c5,#8ff7ec 55%,#ffd98a); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; color:transparent; }
+.hero p { color:#e0edf3; font-size:14px; line-height:1.75; margin:14px 0 0; max-width:580px; }
+
+/* ===== BUTTONS ===== */
+.primary, button.primary, a.primary {
+    display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 18px;
+    color:white; background:linear-gradient(90deg,#08b8a5,#078e91); border:0; border-radius:10px;
+    text-decoration:none; font-size:12px; font-weight:700; box-shadow:0 6px 14px rgba(7,155,145,.28); transition:.2s;
+}
+.primary:hover { transform:translateY(-1px); box-shadow:0 9px 18px rgba(7,155,145,.35); }
+.primary:disabled { opacity:.6; cursor:wait; transform:none; }
+.light, button.light {
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    border:1px solid #dce8f1; border-radius:9px; padding:10px 14px; background:white;
+    color:#34516b; font-size:12px; font-weight:700; transition:.2s;
+}
+.light:hover { background:#e5f8f5; color:#087e78; }
+.danger, button.danger { border:0; border-radius:8px; padding:8px 12px; background:#fdecea; color:#c43b2d; font-size:11px; font-weight:800; }
+.danger:hover { background:#f9d6d2; }
+
+/* ===== STATS ===== */
+.stats { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; margin:20px 0; }
+.stat { position:relative; overflow:hidden; display:flex; align-items:center; gap:14px; min-width:0; padding:20px; background:white; border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); transition:.2s; }
+.stat:hover { transform:translateY(-3px); }
+.stat::after { content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--c,var(--teal)); }
+.stat > span { width:46px; height:46px; display:grid; place-items:center; flex-shrink:0; border-radius:12px; font-size:21px; color:var(--c,var(--teal)); background:color-mix(in srgb,var(--c,var(--teal)) 13%,white); }
+.stat small { display:block; color:#667e93; font-size:12px; font-weight:600; }
+.stat h3 { margin:4px 0 0; font-size:28px; font-weight:800; color:var(--navy); }
+
+/* ===== EMERGENCY HELPLINES ===== */
+.helplines { margin-bottom:20px; padding:20px; border:1px solid #f6d5cd; border-radius:16px; background:linear-gradient(135deg,#fff7f4,#fff); box-shadow:0 8px 26px rgba(229,84,58,.08); }
+.helplines-head { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+.helplines-head .heading-icon { width:44px; height:44px; display:grid; place-items:center; border-radius:12px; font-size:20px; background:linear-gradient(135deg,#f0793a,#e5543a); color:#fff; box-shadow:0 8px 16px rgba(229,84,58,.3); }
+.helplines-head h2 { margin:0; font-size:18px; font-weight:800; letter-spacing:-.3px; color:var(--navy); }
+.helplines-head p { margin:4px 0 0; color:var(--muted); font-size:12px; }
+.helpline-grid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:12px; }
+.helpline-card { display:flex; flex-direction:column; align-items:center; gap:4px; padding:14px 8px; text-align:center; text-decoration:none; color:var(--navy); background:#fff; border:1px solid #f2dcd5; border-radius:14px; transition:.2s; -webkit-tap-highlight-color:rgba(0,0,0,0); }
+.helpline-card:hover { transform:translateY(-3px); border-color:#e5543a; box-shadow:0 10px 22px rgba(229,84,58,.16); }
+.helpline-card .hl-icon { font-size:24px; }
+.helpline-card .hl-number { font-size:21px; font-weight:800; color:#e5543a; letter-spacing:.5px; }
+.helpline-card .hl-name { font-size:11px; font-weight:700; color:#536f87; }
+
+/* ===== PANELS ===== */
+.panel { min-width:0; margin-bottom:20px; padding:22px; background:white; border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow); }
+.panel > h3, .panelhead h3 { margin:0; font-size:18px; font-weight:800; letter-spacing:-.3px; color:var(--navy); }
+.panel > p, .panelhead p { margin:5px 0 0; color:var(--muted); font-size:12px; line-height:1.6; font-weight:500; }
+.panelhead { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:16px; padding-bottom:14px; border-bottom:2px solid #eef4f8; }
+.panel.alert-section > h3 { padding-bottom:0; }
+.panel.alert-section > p { margin-bottom:0; }
+.accent-red { border-top:4px solid #e5543a; box-shadow:0 8px 26px rgba(229,84,58,.12); }
+
+.quick-links { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+
+/* ===== FILTERS ===== */
+.filter-row { display:flex; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
+.filter-row input, .filter-row select { padding:11px 13px; border:1px solid #dce7f0; border-radius:10px; font-size:12px; background:#fbfdff; color:#29445d; }
+.filter-row input { flex:1; min-width:220px; }
+.filter-row input:focus, .filter-row select:focus { outline:none; border-color:var(--teal); box-shadow:0 0 0 3px rgba(7,155,145,.12); }
+.count-note { margin:10px 2px 0; font-size:11.5px; color:var(--muted); }
+
+/* ===== TABLES ===== */
+.tablewrap { max-height:480px; overflow-x:auto; overflow-y:auto; border:1px solid var(--border); border-radius:12px; scrollbar-width:thin; scrollbar-color:#0d9488 #eaf2f5; }
+table { width:100%; border-collapse:separate; border-spacing:0; font-size:11.5px; min-width:960px; }
+th { position:sticky; top:0; z-index:2; background:#f0f6fa; color:#536f87; text-align:left; padding:12px 10px; font-weight:700; white-space:nowrap; }
+td { padding:12px 10px; border-bottom:1px solid #edf2f6; color:#607b91; vertical-align:top; overflow-wrap:anywhere; }
+tbody tr:hover td { background:#f8fbfd; }
+td button { margin:2px 4px 2px 0; border:0; border-radius:8px; padding:8px 12px; background:linear-gradient(90deg,#08b8a5,#078e91); color:#fff; font-size:11px; font-weight:800; }
+td button.reject, td button.danger, td button.light { background:#fdecea; color:#c43b2d; border:0; }
+td button.b-proceed { background:linear-gradient(135deg,#3b82f6,#2563eb); }
+td button.b-resolved { background:linear-gradient(135deg,#34d399,#10b981); }
+td button.b-schedule { background:linear-gradient(135deg,#fbbf24,#d97706); }
+td select { padding:7px 9px; border:1px solid #dce7f0; border-radius:8px; background:#fbfdff; color:#29445d; font-size:11px; }
+.tablewrap::-webkit-scrollbar { width:7px; height:7px; }
+.tablewrap::-webkit-scrollbar-thumb { background:#0d9488; border-radius:10px; }
+.tablewrap::-webkit-scrollbar-track { background:#eaf2f5; border-radius:10px; }
+.empty-state { text-align:center; padding:34px 16px; color:var(--muted); font-size:13px; }
+.req-id { font-weight:800; color:#056a63; white-space:nowrap; }
+.person b { display:block; color:var(--navy); font-size:12px; }
+.person small { color:var(--muted); }
+.desc { max-width:260px; line-height:1.5; }
+.map-link { color:var(--teal); font-weight:700; text-decoration:underline; }
+.helper-badge { margin-top:8px; padding:7px 10px; border-radius:10px; background:rgba(37,99,235,.1); color:#1d4ed8; font-size:11px; font-weight:700; line-height:1.45; }
+.pickup-note { margin-top:8px; padding:8px 10px; border-radius:10px; background:rgba(16,185,129,.12); color:#047857; font-size:11.5px; font-weight:600; line-height:1.45; }
+.muted { color:#94a3b8; }
+
+/* status pills */
+.status, .badge, .pill { display:inline-block; padding:5px 9px; border-radius:20px; font-size:10px; font-weight:700; white-space:nowrap; background:#fff1df; color:#ad6b10; }
+.status-progress, .badge.progress, .pill.progress { background:#e5f0ff; color:#2877db; }
+.status-resolved, .badge.approved, .badge.resolved, .pill.resolved { background:#e0f8f1; color:#07866e; }
+.badge.rejected, .pill.rejected { background:#fdecea; color:#c43b2d; }
+.pill.low { background:#e0f8f1; color:#07866e; }
+.pill.medium { background:#fff1df; color:#ad6b10; }
+.pill.high { background:#fdecea; color:#c43b2d; }
+.pill-blood { background:#fee2e2; color:#b91c1c; }
+.pill-done { background:#e0f2fe; color:#0369a1; }
+.pill-don-available { background:#fef3c7; color:#b45309; }
+.pill-don-scheduled { background:#dbeafe; color:#1d4ed8; }
+.pill-don-picked { background:#d1fae5; color:#065f46; }
+
+/* ===== RESOURCES ===== */
+.resourcegrid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; }
+.resourcegrid > div { display:flex; flex-direction:column; align-items:center; gap:4px; padding:18px 10px; text-align:center; font-size:22px; background:linear-gradient(135deg,#fbfffe,#f0fbf8); border:1px solid #dceeea; border-radius:14px; transition:.2s; }
+.resourcegrid > div:hover { transform:translateY(-3px); border-color:#9fdcd3; }
+.resourcegrid b { font-size:14px; color:var(--navy); }
+.resourcegrid small { color:var(--muted); font-size:12px; font-weight:600; }
+
+/* ===== ALERT FORM + FEED ===== */
+.alert-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; align-items:start; }
+.alert-grid > .panel { margin-bottom:0; }
+.alert-form { display:grid; gap:14px; margin-top:16px; }
+.alert-form label { display:block; margin-bottom:7px; font-size:11px; font-weight:700; color:#34516b; }
+.alert-form input, .alert-form select, .alert-form textarea {
+    width:100%; min-width:0; padding:12px; color:#29445d; background:#fbfdff;
+    border:1px solid #dce7f0; border-radius:9px; outline:none; font-size:12px; transition:.2s;
+}
+.alert-form input:focus, .alert-form select:focus, .alert-form textarea:focus { border-color:var(--teal); box-shadow:0 0 0 3px rgba(7,155,145,.12); }
+.alert-form textarea { resize:vertical; min-height:100px; line-height:1.6; }
+.alert-form input[type="file"] { padding:9px; background:#fff; }
+.alert-help { margin:6px 0 0; color:#8395a6; font-size:11px; }
+.alert-message { margin:0; font-size:12px; font-weight:600; color:#07866e; min-height:18px; }
+.alert-form .primary { width:100%; padding:14px; }
+#imgPreview { display:none; margin-top:10px; max-height:170px; border-radius:12px; border:1px solid var(--border); }
+
+.alert-feed { margin:16px 0; max-height:520px; overflow-y:auto; padding-right:6px; scrollbar-width:thin; scrollbar-color:#0d9488 #eaf2f5; }
+.alert-feed::-webkit-scrollbar { width:7px; }
+.alert-feed::-webkit-scrollbar-thumb { background:#0d9488; border-radius:10px; }
+.alert-feed::-webkit-scrollbar-track { background:#eaf2f5; border-radius:10px; }
+.incident-card { margin:0 0 12px; padding:16px; border:1px solid var(--border); border-left:4px solid #e5543a; border-radius:13px; background:#fff; overflow-wrap:anywhere; transition:.2s; }
+.incident-card:hover { box-shadow:0 8px 20px rgba(229,84,58,.12); }
+.incident-card h4 { margin:0 0 10px; font-size:14px; color:var(--navy); }
+.incident-card p { margin:7px 0; font-size:12px; line-height:1.6; color:#61798d; }
+.incident-card img { display:block; width:100%; max-width:520px; max-height:320px; object-fit:contain; margin-top:12px; border-radius:10px; background:#eaf1f5; }
+.incident-meta { color:#72869b; font-size:11px; }
+
+/* ===== MODAL + TOAST ===== */
+.modal { display:none; position:fixed; inset:0; z-index:200; align-items:center; justify-content:center; padding:16px; background:rgba(9,45,70,.65); backdrop-filter:blur(4px); }
+.modal.active { display:flex; }
+.modal-card { position:relative; width:100%; max-width:460px; max-height:90vh; overflow-y:auto; padding:26px; border-radius:20px; background:#fff; box-shadow:0 20px 40px rgba(0,0,0,.3); }
+.modal-card h3 { margin:0 0 4px; font-size:19px; color:var(--navy); }
+.modal-card .sub { margin:0 0 16px; font-size:12.5px; color:var(--muted); line-height:1.5; }
+.modal-x { position:absolute; top:14px; right:14px; width:32px; height:32px; border:0; border-radius:50%; background:#f0f6fa; color:var(--navy); font-weight:700; }
+.donor-chip { display:inline-block; margin-bottom:14px; padding:6px 12px; border-radius:20px; background:#f0f6fa; border:1px solid var(--border); font-size:12px; font-weight:700; color:var(--navy); overflow-wrap:anywhere; }
+.field { margin-bottom:14px; }
+.field label { display:block; font-size:12px; font-weight:700; margin-bottom:7px; color:var(--navy); }
+.field input, .field textarea { width:100%; padding:12px; border:1px solid #dce7f0; border-radius:10px; font-size:13px; background:#fbfdff; color:#29445d; }
+.field textarea { resize:vertical; min-height:90px; }
+.field input:focus, .field textarea:focus { outline:none; border-color:var(--teal); box-shadow:0 0 0 3px rgba(7,155,145,.12); }
+.modal-actions { display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; }
+.btn-schedule-main { background:linear-gradient(135deg,#fbbf24,#d97706); }
+
+.toast { position:fixed; right:24px; bottom:24px; z-index:300; max-width:360px; padding:14px 18px; border-radius:14px; color:#fff; font-weight:600; font-size:14px; background:#0b455b; box-shadow:0 12px 30px rgba(0,0,0,.3); transform:translateY(30px); opacity:0; pointer-events:none; transition:all .3s; }
+.toast.show { transform:translateY(0); opacity:1; }
+.toast.ok { background:linear-gradient(135deg,#059669,#10b981); }
+.toast.err { background:linear-gradient(135deg,#dc2626,#ef4444); }
+
+.notice { margin:24px 0 0; padding:14px 18px; border:1px dashed #d5e3ec; border-radius:12px; color:#72869b; font-size:11.5px; line-height:1.7; text-align:center; background:rgba(255,255,255,.6); }
+.footer { display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-top:24px; padding:16px 5px 0; border-top:1px solid var(--border); color:#8195a6; font-size:11px; }
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:1200px) {
+    .topbar { flex-wrap:wrap; }
+    .top-nav { order:3; width:100%; justify-content:flex-start; }
+}
+@media(max-width:1100px) {
+    .stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .helpline-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+    .content { padding:18px 18px 70px; }
+    .topbar { padding:14px 20px; }
+}
+@media(max-width:900px) {
+    .alert-grid { grid-template-columns:1fr; }
+    .resourcegrid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:600px) {
+    .content { padding:12px 12px 70px; }
+    .topbar { padding:12px 14px; }
+    .rl-emblem { width:44px; height:44px; }
+    .rl-brand-name { font-size:23px; }
+    .rl-brand-sub { font-size:8.5px; letter-spacing:1.4px; }
+    .admin-name, .clock { display:none; }
+    .nav-link { padding:9px 14px; font-size:11.5px; }
+    .hero { padding:28px 22px; }
+    .stats { gap:10px; }
+    .stat { padding:14px; }
+    .stat h3 { font-size:23px; }
+    .helpline-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .panel { padding:16px; }
+}
+@media(max-width:450px) {
+    .rl-brand-sub, .server-badge { display:none; }
+    .stats { grid-template-columns:1fr 1fr; }
+    .stat { flex-direction:column; align-items:flex-start; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition:none !important; animation:none !important; scroll-behavior:auto !important; } }
+</style>
+</head>
+
+<body data-page="admin">
+
+<!-- Header -->
+<header class="topbar">
+    <a class="rl-brand" href="admin-dashboard.html">
+        <svg class="rl-emblem" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+                <linearGradient id="emblemGrad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#5df0d9"/>
+                    <stop offset="1" stop-color="#079b91"/>
+                </linearGradient>
+            </defs>
+            <path fill="url(#emblemGrad)" d="M24 43C8 31 3 22 3 14.5 3 8.7 7.6 4.5 13 4.5c4.4 0 8.4 2.5 11 6.6 2.6-4.1 6.6-6.6 11-6.6 5.4 0 10 4.2 10 10 0 7.5-5 16.5-21 28.5z"/>
+            <rect x="21.8" y="13" width="4.4" height="16" rx="2.2" fill="#fff"/>
+            <rect x="16" y="18.8" width="16" height="4.4" rx="2.2" fill="#fff"/>
+        </svg>
+        <div class="rl-brand-text">
+            <div class="rl-brand-name">ReliefLink</div>
+            <div class="rl-brand-sub">Community Emergency Platform</div>
+        </div>
+    </a>
+
+    <nav class="top-nav">
+        <a href="#overview">▦ Dashboard</a>
+        <a href="#volunteer-requests">♧ Volunteers</a>
+        <a href="#emergency-requests">☷ Requests</a>
+        <a href="#donations">🎁 Donations</a>
+        <a href="#resources">◇ Resources</a>
+        <a href="#postAlert">🚧 Post Alert</a>
+        <a href="#communityAlerts">⚠ View Alerts</a>
+    </nav>
+
+    <div class="top-actions">
+        <div class="clock"><b id="clockTime">--:--</b><span id="clockDate"></span></div>
+        <span class="server-badge online" id="serverStatusBadge">● Server online</span>
+        <div class="admin-name">
+            <small>Signed in as</small>
+            <span id="displayName">Administrator Dashboard</span>
+        </div>
+        <button type="button" class="nav-link" id="logoutBtn"><span>⇥</span>Logout</button>
+    </div>
+</header>
+
+<main class="content">
+
+    <!-- Hero -->
+    <section class="hero" id="overview">
+        <div class="hero-copy">
+            <div class="hero-tag">ADMINISTRATOR CONTROL CENTER</div>
+            <h2 id="greeting">Coordinate Relief.<br><span>Keep Communities Safe.</span></h2>
+            <p>Approve volunteer applications, manage emergency requests and item donations, coordinate resources, and publish community safety alerts.</p>
+        </div>
+    </section>
+
+    <!-- Statistics -->
+    <div class="stats">
+        <article class="stat" style="--c:#2877db;">
+            <span>♙</span>
+            <div><small>Total Requests</small><h3 id="adminRequestCount">0</h3></div>
+        </article>
+        <article class="stat" style="--c:#e58a20;">
+            <span>♧</span>
+            <div><small>Pending Volunteers</small><h3 id="adminPendingVolunteers">0</h3></div>
+        </article>
+        <article class="stat" style="--c:#f59e0b;">
+            <span>🕒</span>
+            <div><small>Open Requests</small><h3 id="adminOpenRequests">0</h3></div>
+        </article>
+        <article class="stat" style="--c:#2563eb;">
+            <span>⚡</span>
+            <div><small>In Progress</small><h3 id="statProgress">0</h3></div>
+        </article>
+        <article class="stat" style="--c:#10b981;">
+            <span>✓</span>
+            <div><small>Completed</small><h3 id="statResolved">0</h3></div>
+        </article>
+        <article class="stat" style="--c:#8654cf;">
+            <span>◇</span>
+            <div><small>Resource Categories</small><h3 id="adminResources">4</h3></div>
+        </article>
+    </div>
+
+    <!-- Emergency Helplines -->
+    <section class="helplines" id="helplines">
+        <div class="helplines-head">
+            <div class="heading-icon">📞</div>
+            <div>
+                <h2>Emergency Helplines</h2>
+                <p>Quick access to regional emergency responders.</p>
+            </div>
+        </div>
+        <div class="helpline-grid">
+            <a class="helpline-card" href="tel:112" rel="external"><span class="hl-icon">🆘</span><span class="hl-number">112</span><span class="hl-name">National Emergency</span></a>
+            <a class="helpline-card" href="tel:100" rel="external"><span class="hl-icon">👮</span><span class="hl-number">100</span><span class="hl-name">Police</span></a>
+            <a class="helpline-card" href="tel:101" rel="external"><span class="hl-icon">🚒</span><span class="hl-number">101</span><span class="hl-name">Fire</span></a>
+            <a class="helpline-card" href="tel:108" rel="external"><span class="hl-icon">🚑</span><span class="hl-number">108</span><span class="hl-name">Ambulance</span></a>
+            <a class="helpline-card" href="tel:1070" rel="external"><span class="hl-icon">🌊</span><span class="hl-number">1070</span><span class="hl-name">Disaster Helpline</span></a>
+            <a class="helpline-card" href="tel:1091" rel="external"><span class="hl-icon">🛡️</span><span class="hl-number">1091</span><span class="hl-name">Women Helpline</span></a>
+        </div>
+    </section>
+
+    <!-- Quick Actions -->
+    <section class="panel">
+        <h3>⚡ Quick Actions</h3>
+        <div class="quick-links">
+            <a class="primary" href="#volunteer-requests">Review Volunteers</a>
+            <a class="primary" href="#emergency-requests">Manage Requests</a>
+            <a class="primary" href="#donations">Manage Donations</a>
+            <a class="primary" href="#postAlert">Post Community Alert</a>
+            <a class="primary" href="#communityAlerts">View Published Alerts</a>
+        </div>
+    </section>
+
+    <!-- Volunteer Applications -->
+    <section class="panel" id="volunteer-requests">
+        <div class="panelhead">
+            <div>
+                <h3>♧ Volunteer Applications</h3>
+                <p>Approve or reject applications before granting access.</p>
+            </div>
+            <button type="button" class="primary" id="refreshVolunteersBtn">↻ Refresh</button>
+        </div>
+        <div class="tablewrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Support Area</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="volunteerApplicationsTable">
+                    <tr><td colspan="6" class="empty-state">Loading volunteer applications...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Community Requests -->
+    <section class="panel" id="emergency-requests">
+        <div class="panelhead">
+            <div>
+                <h3>☷ Community User Requests</h3>
+                <p>Contact number, blood group, location, helper offers and description of every request. Proceed or resolve them directly.</p>
+            </div>
+            <button type="button" class="primary" id="refreshRequestsBtn">↻ Refresh</button>
+        </div>
+
+        <div class="filter-row">
+            <input type="search" id="requestSearch" placeholder="🔍 Search requests by user, blood group, location, type...">
+            <select id="statusFilter">
+                <option value="all">All Statuses</option>
+                <option value="Pending">Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
+            </select>
+        </div>
+
+        <div class="tablewrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Requester / Contact</th>
+                        <th>Blood Group</th>
+                        <th>Type</th>
+                        <th>Location &amp; PIN</th>
+                        <th>Description &amp; Helper Offer</th>
+                        <th>Priority</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="requestsTableBody">
+                    <tr><td colspan="8" class="empty-state">Loading requests...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="count-note" id="countNote"></div>
+    </section>
+
+    <!-- Community Item Donations -->
+    <section class="panel" id="donations">
+        <div class="panelhead">
+            <div>
+                <h3>🎁 Community Item Donations</h3>
+                <p>Food, medicine and clothing offered by users. Schedule a pickup and notify the donor.</p>
+            </div>
+            <button type="button" class="primary" id="refreshDonationsBtn">↻ Refresh</button>
+        </div>
+
+        <div class="filter-row">
+            <input type="search" id="donationSearch" placeholder="🔍 Search donations by donor, category, location, items...">
+            <select id="donationStatusFilter">
+                <option value="all">All Statuses</option>
+                <option value="available">Awaiting Pickup</option>
+                <option value="scheduled">Pickup Scheduled</option>
+                <option value="picked">Picked</option>
+            </select>
+        </div>
+
+        <div class="tablewrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Donor / Contact</th>
+                        <th>Category</th>
+                        <th>Items &amp; Details</th>
+                        <th>Pickup Location</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="donationsTableBody">
+                    <tr><td colspan="7" class="empty-state">Loading donations...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="count-note" id="donationCountNote"></div>
+    </section>
+
+    <!-- Resource Inventory -->
+    <section class="panel" id="resources">
+        <div class="panelhead">
+            <div>
+                <h3>◇ Resource Inventory</h3>
+                <p>Sample resource availability for demonstration.</p>
+            </div>
+        </div>
+        <div class="resourcegrid">
+            <div>🥫 <b>Food</b><small>120 units</small></div>
+            <div>✚ <b>Medical</b><small>45 kits</small></div>
+            <div>⌂ <b>Shelter</b><small>30 spaces</small></div>
+            <div>💧 <b>Water</b><small>200 units</small></div>
+        </div>
+    </section>
+
+    <!-- Post Alert + Published Alerts -->
+    <div class="alert-grid">
+
+        <section class="panel alert-section" id="postAlert">
+            <h3>🚧 Post a Community Alert</h3>
+            <p>Publish roadblocks, traffic congestion, accidents, floods, fires, and other community safety information.</p>
+
+            <form id="alertForm" class="alert-form" enctype="multipart/form-data">
+                <div>
+                    <label for="alertCategory">Alert Category *</label>
+                    <select id="alertCategory" required>
+                        <option value="">Select a category</option>
+                        <option value="Roadblock">Roadblock</option>
+                        <option value="Traffic">Traffic</option>
+                        <option value="Accident">Accident</option>
+                        <option value="Flood">Flood</option>
+                        <option value="Fire">Fire</option>
+                        <option value="Weather">Weather Warning</option>
+                        <option value="Other">Other Safety Alert</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="alertLocation">Location *</label>
+                    <input type="text" id="alertLocation" placeholder="Example: Main Road, Kochi" required>
+                </div>
+
+                <div>
+                    <label for="alertDescription">Description *</label>
+                    <textarea id="alertDescription" rows="4" placeholder="Describe the incident, affected road, or safety concern..." required></textarea>
+                </div>
+
+                <div>
+                    <label for="alertImage">Upload Image (Optional)</label>
+                    <input type="file" id="alertImage" accept="image/*">
+                    <img id="imgPreview" alt="Selected photo preview">
+                    <p class="alert-help">Choose an image showing the road condition or incident. Maximum size: 5 MB.</p>
+                </div>
+
+                <div>
+                    <button type="submit" class="primary" id="publishAlertBtn">➤ Publish Alert</button>
+                </div>
+
+                <p id="alertMessage" class="alert-message" role="status" aria-live="polite"></p>
+            </form>
+        </section>
+
+        <section class="panel alert-section accent-red" id="communityAlerts">
+            <h3>⚠ Published Community Alerts</h3>
+            <p>View alerts shared by administrators and volunteers.</p>
+
+            <div id="alertFeed" class="alert-feed" aria-live="polite">
+                Loading community alerts...
+            </div>
+
+            <button type="button" class="light" id="refreshAlertsBtn">↻ Refresh Alerts</button>
+        </section>
+
+    </div>
+
+    <p class="notice">
+        ReliefLink Administrator Control Center · Connected to live backend database and Amazon SES notifications.
+    </p>
+
+    <footer class="footer">
+        <span><strong>ReliefLink</strong> | Community Emergency Resource Platform</span>
+        <span>Stronger communities. Safer tomorrows. 💚</span>
+    </footer>
+
+</main>
+
+<!-- ===== Schedule Pickup Modal ===== -->
+<div class="modal" id="scheduleModal" aria-hidden="true">
+    <div class="modal-card">
+        <button type="button" class="modal-x" id="scheduleClose" aria-label="Close">✕</button>
+        <h3>📦 Schedule Pickup</h3>
+        <p class="sub">Write a short pickup message or ETA. The donor will see it on their dashboard and may also receive it by email.</p>
+        <span class="donor-chip" id="scheduleDonor">Donor</span>
+
+        <form id="scheduleForm">
+            <div class="field">
+                <label for="scheduleVolunteer">Your name</label>
+                <input type="text" id="scheduleVolunteer" maxlength="100" placeholder="Name">
+            </div>
+            <div class="field">
+                <label for="scheduleMessage">Pickup message / ETA *</label>
+                <textarea id="scheduleMessage" maxlength="500" required placeholder="e.g. I will collect the items tomorrow between 10 AM and 12 PM."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="light" id="scheduleCancel">Cancel</button>
+                <button type="submit" class="primary btn-schedule-main" id="scheduleSubmit">✉️ Schedule &amp; Notify Donor</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+(function () {
+    const $ = id => document.getElementById(id);
+    let requestsData = [];
+    let donationsData = [];
+    let volunteersData = [];
+    let donationsError = false;
+    let scheduleTargetId = null;
+
+    /* ---------- Session & Logout ---------- */
+    function getSession() {
+        try { return JSON.parse(localStorage.getItem("rl_session") || "null"); }
+        catch (e) { return null; }
+    }
+    const adminEmail = () => String((getSession() || {}).email || "admin@relieflink.org").trim().toLowerCase();
+    function adminName() {
+        const s = getSession() || {};
+        return String(s.name || s.username || s.full_name || (s.email ? s.email.split("@")[0] : "") || "Administrator");
+    }
+
+    $("displayName").textContent = adminName();
+    $("logoutBtn").addEventListener("click", () => {
+        localStorage.removeItem("rl_session");
+        window.location.href = "login.html";
+    });
+
+    /* ---------- Helpers ---------- */
+    function escapeHTML(str) {
+        return String(str == null ? "" : str).replace(/[&<>"']/g, c => ({
+            "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+        }[c]));
+    }
+    let toastTimer;
+    function toast(msg, type) {
+        const t = $("toast");
+        t.textContent = msg;
+        t.className = "toast show " + (type || "");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => { t.className = "toast " + (type || ""); }, 3800);
+    }
+    function setServer(online) {
+        const b = $("serverStatusBadge");
+        b.className = "server-badge " + (online ? "online" : "offline");
+        b.textContent = online ? "● Server online" : "● Server offline";
+    }
+    function locationHTML(locationStr) {
+        const raw = String(locationStr || "").trim();
+        if (!raw) return "Location not given";
+        const m = raw.match(/-?\d{1,3}\.\d+,\s*-?\d{1,3}\.\d+/);
+        if (m) {
+            const url = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(m[0]);
+            return `<a class="map-link" href="${url}" target="_blank" rel="noopener noreferrer">Open in Maps (${escapeHTML(m[0])})</a>`;
+        }
+        return escapeHTML(raw);
+    }
+
+    /* ---------- Clock ---------- */
+    function tick() {
+        const d = new Date();
+        $("clockTime").textContent = d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+        $("clockDate").textContent = d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+    }
+    tick();
+    setInterval(tick, 30000);
+
+    /* ---------- Alert image preview ---------- */
+    $("alertImage").addEventListener("change", () => {
+        const f = $("alertImage").files[0];
+        const img = $("imgPreview");
+        if (f) { img.src = URL.createObjectURL(f); img.style.display = "block"; }
+        else { img.style.display = "none"; }
+    });
+
+    /* =====================================================
+       1. VOLUNTEER APPLICATIONS (APPROVE / REJECT)
+       ===================================================== */
+    async function loadVolunteers() {
+        try {
+            const res = await fetch("/api/volunteers", { cache: "no-store" });
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            const data = await res.json();
+            volunteersData = Array.isArray(data) ? data : (data.volunteers || data.data || data.items || []);
+            renderVolunteers();
+        } catch (err) {
+            console.error("Failed to load volunteers:", err);
+            $("volunteerApplicationsTable").innerHTML = `<tr><td colspan="6" class="empty-state">Could not load volunteer applications.</td></tr>`;
+        }
+    }
+
+    function renderVolunteers() {
+        const tbody = $("volunteerApplicationsTable");
+        const pendingCount = volunteersData.filter(v => (v.status || "Pending") === "Pending").length;
+        $("adminPendingVolunteers").textContent = pendingCount;
+
+        if (!volunteersData.length) {
+            tbody.innerHTML = `<tr><td colspan="6" class="empty-state">No volunteer applications submitted yet.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = volunteersData.map(v => {
+            const status = v.status || "Pending";
+            const badgeCls = status === "Approved" ? "approved" : (status === "Rejected" ? "rejected" : "");
+            const actions = status === "Pending"
+                ? `<button type="button" onclick="adminUpdateVolunteer(${v.id}, 'Approved')">✓ Approve</button>
+                   <button type="button" class="reject" onclick="adminUpdateVolunteer(${v.id}, 'Rejected')">✕ Reject</button>`
+                : `<span class="badge ${badgeCls}">${escapeHTML(status)}</span>`;
+
+            return `
+                <tr>
+                    <td><b>${escapeHTML(v.name)}</b></td>
+                    <td>${escapeHTML(v.email)}</td>
+                    <td>📞 ${escapeHTML(v.phone)}</td>
+                    <td>${escapeHTML(v.skill)}</td>
+                    <td><span class="badge ${badgeCls}">${escapeHTML(status)}</span></td>
+                    <td>${actions}</td>
+                </tr>`;
+        }).join("");
+    }
+
+    window.adminUpdateVolunteer = async function (id, status) {
+        try {
+            const res = await fetch(`/api/volunteers/${id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || data.error || "Update failed");
+            toast(`Volunteer application ${status.toLowerCase()}.`, "ok");
+            await loadVolunteers();
+        } catch (err) {
+            toast("Error updating volunteer: " + err.message, "err");
+        }
+    };
+
+    /* =====================================================
+       2. COMMUNITY REQUESTS
+       ===================================================== */
+    async function loadRequests() {
+        try {
+            const response = await fetch("/api/requests?scope=all", { cache: "no-store" });
+            if (!response.ok) throw new Error("HTTP " + response.status);
+            const data = await response.json();
+            requestsData = Array.isArray(data) ? data : (data.requests || data.data || data.items || []);
+            setServer(true);
+            renderRequests();
+        } catch (err) {
+            console.error("Failed to load requests:", err);
+            setServer(false);
+        }
+    }
+
+    function renderRequests() {
+        const tbody = $("requestsTableBody");
+        const term = $("requestSearch").value.toLowerCase().trim();
+        const statusFilter = $("statusFilter").value;
+
+        const filtered = requestsData.filter(r => {
+            const bloodVal = r.blood_group || r.bloodGroup || r.blood || "";
+            const phoneVal = r.phone || r.contact || r.mobile || "";
+            const matchesTerm = !term || [
+                r.type, r.category, r.location, r.owner, r.details,
+                r.name, r.email, phoneVal, bloodVal, r.pincode, r.helper_name, r.helper_email
+            ].filter(Boolean).some(v => String(v).toLowerCase().includes(term));
+            return matchesTerm && (statusFilter === "all" || r.status === statusFilter);
+        });
+
+        $("adminRequestCount").textContent = requestsData.length;
+        $("adminOpenRequests").textContent = requestsData.filter(r => r.status === "Pending").length;
+        $("statProgress").textContent = requestsData.filter(r => r.status === "In Progress").length;
+        $("statResolved").textContent = requestsData.filter(r => r.status === "Resolved").length;
+        $("countNote").textContent = requestsData.length
+            ? `Showing ${filtered.length} of ${requestsData.length} requests — scroll inside the table to see more.`
+            : "";
+
+        if (!filtered.length) {
+            tbody.innerHTML = `<tr><td colspan="8" class="empty-state">No matching emergency requests found.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = filtered.map(r => {
+            const id = r.id;
+            const displayName = (r.name && r.name.trim()) || (r.owner && r.owner.includes("@") ? r.owner.split("@")[0] : "Community Member");
+            const displayEmail = (r.owner && r.owner.includes("@") ? r.owner : (r.email || ""));
+
+            const rawPhone = r.phone || r.contact || r.mobile;
+            const phone = (rawPhone && rawPhone !== "None" && rawPhone !== "null" && rawPhone !== "Not provided") ? rawPhone : "Not provided";
+
+            const rawBlood = r.blood_group || r.bloodGroup || r.blood || r.user_blood;
+            const hasBlood = rawBlood && rawBlood !== "N/A" && rawBlood !== "None" && rawBlood !== "null";
+            const blood = hasBlood ? `<span class="pill pill-blood">🩸 ${escapeHTML(rawBlood)}</span>` : `<span class="muted">N/A</span>`;
+
+            const pin = (r.pincode && r.pincode !== "N/A" && r.pincode !== "None") ? ` (${escapeHTML(r.pincode)})` : "";
+            const type = r.type || r.category || "Emergency";
+            const priority = String(r.priority || "Medium");
+            const status = r.status || "Pending";
+            const details = r.details || r.description || "—";
+            const offerStatus = r.offer_status || "";
+
+            let helperBadge = "";
+            if (r.helper_email) {
+                const hName = r.helper_name || r.helper_email.split("@")[0];
+                if (offerStatus === "Offered") {
+                    helperBadge = `<div class="helper-badge">🙋 Helper Offered: ${escapeHTML(hName)} (${escapeHTML(r.helper_email)})</div>`;
+                } else if (offerStatus === "Approved") {
+                    helperBadge = `<div class="pickup-note">🤝 Approved Helper: ${escapeHTML(hName)} (${escapeHTML(r.helper_email)})</div>`;
+                }
+            }
+
+            let actionBtn = "";
+            if (status === "Pending") {
+                const btnText = offerStatus === "Offered" ? "⚡ Proceed (Approve Helper)" : "⚡ Proceed";
+                actionBtn = `<button class="b-proceed" onclick="adminProceedRequest(${id})">${btnText}</button>`;
+            } else if (status === "In Progress") {
+                actionBtn = `<button class="b-resolved" onclick="adminResolveRequest(${id})">✓ Resolve</button>`;
+            } else {
+                actionBtn = `<span class="pill pill-done">✓ Completed</span>`;
+            }
+
+            const statusCls = status === "In Progress" ? "progress" : (status === "Resolved" ? "resolved" : "");
+            const prioCls = priority.toLowerCase();
+
+            return `
+                <tr>
+                    <td class="req-id">#RL-${escapeHTML(id)}</td>
+                    <td class="person">
+                        <b>${escapeHTML(displayName)}</b>
+                        ${displayEmail ? `<small>${escapeHTML(displayEmail)}</small><br>` : ""}
+                        <small style="color:var(--text);font-weight:600;">📞 ${escapeHTML(phone)}</small>
+                    </td>
+                    <td>${blood}</td>
+                    <td><b>${escapeHTML(type)}</b><br><span class="pill ${statusCls}" style="margin-top:6px;">${escapeHTML(status)}</span></td>
+                    <td>📍 ${locationHTML(r.location)}${pin}</td>
+                    <td class="desc">${escapeHTML(details)}${helperBadge}</td>
+                    <td><span class="pill ${escapeHTML(prioCls)}">${escapeHTML(priority)}</span></td>
+                    <td>${actionBtn}</td>
+                </tr>`;
+        }).join("");
+    }
+
+    window.adminProceedRequest = async function (id) {
+        try {
+            const res = await fetch(`/api/requests/${id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "proceed", volunteer_email: adminEmail(), status: "In Progress" })
+            });
+            if (!res.ok) throw new Error("Failed to update");
+            toast("Request approved and moved to In Progress.", "ok");
+            await loadRequests();
+        } catch (err) {
+            toast("Error updating request: " + err.message, "err");
+        }
+    };
+
+    window.adminResolveRequest = async function (id) {
+        try {
+            const res = await fetch(`/api/requests/${id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ confirmation: "Helped", status: "Resolved" })
+            });
+            if (!res.ok) throw new Error("Failed to update");
+            toast("Request marked as resolved.", "ok");
+            await loadRequests();
+        } catch (err) {
+            toast("Error resolving request: " + err.message, "err");
+        }
+    };
+
+    /* =====================================================
+       3. ITEM DONATIONS
+       ===================================================== */
+    function donationStage(d) {
+        const s = String(d.status || "").toLowerCase();
+        if (s.includes("picked") || s.includes("collect") || s.includes("complete")) return "picked";
+        if (s.includes("schedul")) return "scheduled";
+        return "available";
+    }
+    const DON_ICON = { Food: "🍲", Medicine: "💊", Clothing: "🧥", Other: "📦" };
+
+    async function loadDonations() {
+        try {
+            const response = await fetch("/api/donations?scope=all", { cache: "no-store" });
+            if (!response.ok) throw new Error("HTTP " + response.status);
+            const data = await response.json();
+            donationsData = Array.isArray(data) ? data : (data.donations || data.data || data.items || []);
+            donationsError = false;
+        } catch (err) {
+            console.error("Failed to load donations:", err);
+            donationsError = true;
+        }
+        renderDonations();
+    }
+
+    function renderDonations() {
+        const tbody = $("donationsTableBody");
+        const term = $("donationSearch").value.toLowerCase().trim();
+        const statusFilter = $("donationStatusFilter").value;
+
+        if (donationsError && !donationsData.length) {
+            $("donationCountNote").textContent = "";
+            tbody.innerHTML = `<tr><td colspan="7" class="empty-state">Unable to load donations. Check that the backend /api/donations endpoint is available.</td></tr>`;
+            return;
+        }
+
+        const filtered = donationsData.filter(d => {
+            const matchesTerm = !term || [
+                d.item_category, d.category, d.item_details, d.details, d.location,
+                d.donor_name, d.donor_email, d.email, d.phone, d.status
+            ].filter(Boolean).some(v => String(v).toLowerCase().includes(term));
+            return matchesTerm && (statusFilter === "all" || donationStage(d) === statusFilter);
+        });
+
+        $("donationCountNote").textContent = donationsData.length
+            ? `Showing ${filtered.length} of ${donationsData.length} donations — scroll inside the table to see more.`
+            : "";
+
+        if (!filtered.length) {
+            tbody.innerHTML = `<tr><td colspan="7" class="empty-state">${donationsData.length ? "No matching donations found." : "No item donations have been submitted yet."}</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = filtered.slice().sort((a, b) => Number(b.id) - Number(a.id)).map(d => {
+            const id = d.id;
+            const stage = donationStage(d);
+            const category = d.item_category || d.category || "Donation";
+            const email = d.donor_email || d.email || "";
+            const name = (d.donor_name && String(d.donor_name).trim()) || (email.includes("@") ? email.split("@")[0] : "Community Donor");
+            const rawPhone = d.phone || d.contact || d.mobile;
+            const phone = (rawPhone && rawPhone !== "None" && rawPhone !== "null" && rawPhone !== "Not provided") ? rawPhone : "Not provided";
+            const details = d.item_details || d.details || "—";
+            const stageLabel = { available: "Awaiting Pickup", scheduled: "Pickup Scheduled", picked: "Picked" }[stage];
+
+            let actionBtn = "";
+            if (stage === "available") actionBtn = `<button class="b-schedule" onclick="adminOpenSchedule('${escapeHTML(id)}')">📦 Schedule Pickup</button>`;
+            else if (stage === "scheduled") actionBtn = `<button class="b-resolved" onclick="adminMarkPickedUp('${escapeHTML(id)}')">✓ Mark Picked Up</button>`;
+            else actionBtn = `<span class="pill pill-done">✓ Picked</span>`;
+
+            const note = d.pickup_message
+                ? `<div class="pickup-note">💬 ${escapeHTML(d.pickup_message)}${d.assigned_volunteer ? `<br><small>Volunteer: ${escapeHTML(d.assigned_volunteer)}</small>` : ""}</div>`
+                : "";
+
+            return `
+                <tr>
+                    <td class="req-id">#DN-${escapeHTML(id)}</td>
+                    <td class="person">
+                        <b>${escapeHTML(name)}</b>
+                        ${email ? `<small>${escapeHTML(email)}</small><br>` : ""}
+                        <small style="color:var(--text);font-weight:600;">📞 ${escapeHTML(phone)}</small>
+                    </td>
+                    <td><b>${DON_ICON[category] || "🎁"} ${escapeHTML(category)}</b></td>
+                    <td class="desc">${escapeHTML(details)}${note}</td>
+                    <td>📍 ${locationHTML(d.location)}</td>
+                    <td><span class="pill pill-don-${stage}">${stageLabel}</span></td>
+                    <td>${actionBtn}</td>
+                </tr>`;
+        }).join("");
+    }
+
+    /* ---------- Schedule pickup modal ---------- */
+    function openModal(id) { $(id).classList.add("active"); $(id).setAttribute("aria-hidden", "false"); }
+    function closeModal(id) { $(id).classList.remove("active"); $(id).setAttribute("aria-hidden", "true"); }
+
+    window.adminOpenSchedule = function (id) {
+        const d = donationsData.find(x => String(x.id) === String(id));
+        if (!d) { toast("Donation not found. Please refresh.", "err"); return; }
+        scheduleTargetId = id;
+        const email = d.donor_email || d.email || "";
+        const name = d.donor_name || (email ? email.split("@")[0] : "Donor");
+        $("scheduleDonor").textContent = `${name}${email ? " · " + email : ""}`;
+        $("scheduleVolunteer").value = adminName();
+        $("scheduleMessage").value = "";
+        openModal("scheduleModal");
+        setTimeout(() => $("scheduleMessage").focus(), 50);
+    };
+
+    function closeSchedule() { closeModal("scheduleModal"); scheduleTargetId = null; }
+    $("scheduleClose").addEventListener("click", closeSchedule);
+    $("scheduleCancel").addEventListener("click", closeSchedule);
+    $("scheduleModal").addEventListener("click", e => { if (e.target === $("scheduleModal")) closeSchedule(); });
+    document.addEventListener("keydown", e => { if (e.key === "Escape") closeSchedule(); });
+
+    $("scheduleForm").addEventListener("submit", async e => {
+        e.preventDefault();
+        if (scheduleTargetId == null) return;
+        const message = $("scheduleMessage").value.trim();
+        const volunteer = $("scheduleVolunteer").value.trim() || adminName();
+        if (!message) { toast("Please write a pickup message.", "err"); return; }
+
+        const btn = $("scheduleSubmit");
+        const original = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = "Sending...";
+
+        try {
+            const res = await fetch(`/api/donations/${encodeURIComponent(scheduleTargetId)}/schedule`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    pickup_message: message,
+                    assigned_volunteer: volunteer,
+                    volunteer_email: adminEmail() || volunteer,
+                    status: "Scheduled"
+                })
+            });
+            let data = {};
+            try { data = await res.json(); } catch (err) { data = {}; }
+            if (!res.ok) throw new Error(data.error || data.message || ("HTTP " + res.status));
+
+            let msg = data.message || "Pickup scheduled. The donor can now see your message.";
+            toast(msg, "ok");
+            closeSchedule();
+            await loadDonations();
+        } catch (err) {
+            toast("Could not schedule pickup: " + err.message, "err");
+        } finally {
+            btn.disabled = false;
+            btn.textContent = original;
+        }
+    });
+
+    window.adminMarkPickedUp = async function (id) {
+        try {
+            const res = await fetch(`/api/donations/${encodeURIComponent(id)}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status: "Picked" })
+            });
+            let data = {};
+            try { data = await res.json(); } catch (err) { data = {}; }
+            if (!res.ok) throw new Error(data.error || data.message || ("HTTP " + res.status));
+            toast("Donation marked as picked. Thank you!", "ok");
+            await loadDonations();
+        } catch (err) {
+            toast("Error updating donation: " + err.message, "err");
+        }
+    };
+
+    /* =====================================================
+       4. COMMUNITY ALERTS (POST + LIVE FEED)
+       ===================================================== */
+    async function loadIncidents() {
+        const feed = $("alertFeed");
+        try {
+            const res = await fetch("/api/incidents", { cache: "no-store" });
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            const data = await res.json();
+            const items = data.incidents || data.alerts || data.data || [];
+
+            if (!items.length) {
+                feed.innerHTML = `<div class="empty-state">No community alerts published yet.</div>`;
+                return;
+            }
+
+            feed.innerHTML = items.map(inc => {
+                const imgHtml = inc.image_url ? `<img src="${escapeHTML(inc.image_url)}" alt="Incident photo">` : "";
+                const timeStr = inc.created_at ? new Date(inc.created_at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }) : "";
+                return `
+                    <article class="incident-card">
+                        <h4>⚠️ ${escapeHTML(inc.category || inc.title)} — 📍 ${escapeHTML(inc.location)}</h4>
+                        <p>${escapeHTML(inc.description)}</p>
+                        ${imgHtml}
+                        <div class="incident-meta" style="margin-top:8px;">Posted by ${escapeHTML(inc.posted_by || "Administrator")} ${timeStr ? "· " + escapeHTML(timeStr) : ""}</div>
+                    </article>`;
+            }).join("");
+        } catch (err) {
+            console.error("Failed to load incidents:", err);
+            feed.innerHTML = `<div class="empty-state">Unable to load community alerts.</div>`;
+        }
+    }
+
+    $("alertForm").addEventListener("submit", async e => {
+        e.preventDefault();
+        const btn = $("publishAlertBtn");
+        const statusEl = $("alertMessage");
+        btn.disabled = true;
+        btn.textContent = "Publishing...";
+        statusEl.textContent = "";
+
+        const formData = new FormData();
+        formData.append("category", $("alertCategory").value);
+        formData.append("title", $("alertCategory").value);
+        formData.append("location", $("alertLocation").value);
+        formData.append("description", $("alertDescription").value);
+        formData.append("posted_by", "ReliefLink Administrator");
+
+        const imgFile = $("alertImage").files[0];
+        if (imgFile) formData.append("image", imgFile);
+
+        try {
+            const res = await fetch("/api/incidents", { method: "POST", body: formData });
+            const resData = await res.json();
+            if (!res.ok) throw new Error(resData.message || resData.error || "Failed to publish alert");
+
+            toast("Alert published! Visible on User & Admin Dashboards.", "ok");
+            statusEl.textContent = "✓ Alert published successfully.";
+            $("alertForm").reset();
+            $("imgPreview").style.display = "none";
+            await loadIncidents();
+        } catch (err) {
+            toast("Alert post failed: " + err.message, "err");
+            statusEl.textContent = "✕ " + err.message;
+        } finally {
+            btn.disabled = false;
+            btn.textContent = "➤ Publish Alert";
+        }
+    });
+
+    /* ---------- Events + boot ---------- */
+    $("requestSearch").addEventListener("input", renderRequests);
+    $("statusFilter").addEventListener("change", renderRequests);
+    $("refreshRequestsBtn").addEventListener("click", loadRequests);
+
+    $("donationSearch").addEventListener("input", renderDonations);
+    $("donationStatusFilter").addEventListener("change", renderDonations);
+    $("refreshDonationsBtn").addEventListener("click", async () => {
+        const b = $("refreshDonationsBtn");
+        b.disabled = true;
+        await loadDonations();
+        b.disabled = false;
+        toast("Donations refreshed.", "ok");
+    });
+
+    $("refreshVolunteersBtn").addEventListener("click", async () => {
+        const b = $("refreshVolunteersBtn");
+        b.disabled = true;
+        await loadVolunteers();
+        b.disabled = false;
+        toast("Volunteers refreshed.", "ok");
+    });
+
+    $("refreshAlertsBtn").addEventListener("click", async () => {
+        const b = $("refreshAlertsBtn");
+        b.disabled = true;
+        await loadIncidents();
+        b.disabled = false;
+        toast("Community alerts refreshed.", "ok");
+    });
+
+    loadVolunteers();
+    loadRequests();
+    loadDonations();
+    loadIncidents();
+
+    setInterval(() => {
+        if (document.hidden) return;
+        loadVolunteers();
+        loadRequests();
+        loadDonations();
+        loadIncidents();
+    }, 10000);
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReliefLink | Volunteer Registration</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #092d46;
+            --teal: #079b91;
+            --muted: #7b8fa2;
+            --border: #dce5ec;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 25px;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            color: #183650;
+            background:
+                radial-gradient(circle at 8% 10%, rgba(32, 212, 197, .28), transparent 40%),
+                radial-gradient(circle at 92% 90%, rgba(40, 119, 219, .22), transparent 40%),
+                linear-gradient(135deg, #e8f6f7, #f4f8fc 55%, #e9f1ff);
+        }
+
+        button, input, select { font: inherit; }
+
+        .login-layout {
+            display: grid;
+            grid-template-columns: 1.05fr 1fr;
+            width: min(100%, 960px);
+            min-height: 560px;
+            overflow: hidden;
+            background: white;
+            border-radius: 26px;
+            box-shadow: 0 30px 80px rgba(9, 45, 70, .18);
+        }
+
+        /* LEFT */
+        .login-hero {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 40px;
+            color: white;
+            background:
+                linear-gradient(160deg, rgba(5, 40, 62, .94), rgba(5, 110, 111, .8)),
+                url('https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&w=1000&q=85') center / cover;
+        }
+
+        .login-hero::before {
+            content: "";
+            position: absolute;
+            width: 300px; height: 300px;
+            right: -100px; top: -90px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(61, 224, 200, .35), transparent 65%);
+            pointer-events: none;
+        }
+
+        .login-hero > * { position: relative; z-index: 1; }
+
+        /* BRAND */
+        .rl-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0;
+        }
+
+        .rl-emblem {
+            width: 54px;
+            height: 54px;
+            flex-shrink: 0;
+            display: block;
+            filter: drop-shadow(0 6px 12px rgba(0, 0, 0, .3));
+        }
+
+        .rl-brand-text {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 6px;
+            min-width: 0;
+        }
+
+        .rl-wordmark {
+            display: block;
+            margin: 0;
+            white-space: nowrap;
+            font-size: 30px;
+            font-weight: 800;
+            letter-spacing: -.6px;
+            line-height: 1;
+            color: #fff;
+        }
+
+        .rl-wordmark span { color: #3de0c8; }
+
+        .rl-tagline {
+            color: #c6e3ed;
+            font-size: 9.5px;
+            font-weight: 700;
+            letter-spacing: 1.7px;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .hero-message h1 {
+            color: white;
+            font-size: clamp(30px, 3.6vw, 42px);
+            line-height: 1.15;
+            letter-spacing: -1px;
+            margin: 0 0 16px;
+        }
+
+        .hero-message h1 span {
+            background: linear-gradient(90deg, #20d4c5, #8ff7ec 55%, #ffd98a);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+        }
+
+        .hero-message p {
+            color: #e0eff4;
+            font-size: 13px;
+            line-height: 1.85;
+            margin: 0;
+            max-width: 400px;
+        }
+
+        .hero-footer { color: #d0e8ee; font-size: 11px; line-height: 1.8; }
+
+        /* RIGHT */
+        .login-content {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 45px;
+        }
+
+        .login-symbol {
+            width: 54px; height: 54px;
+            display: grid; place-items: center;
+            border-radius: 17px;
+            background: linear-gradient(135deg, #e0f8f3, #c9f1ea);
+            color: #078e86;
+            font-size: 26px;
+            margin-bottom: 18px;
+        }
+
+        .login-content h2 {
+            margin: 0 0 8px;
+            font-size: 27px;
+            font-weight: 800;
+            letter-spacing: -.5px;
+            color: var(--navy);
+        }
+
+        .intro {
+            color: var(--muted);
+            font-size: 12.5px;
+            line-height: 1.8;
+            margin: 0 0 24px;
+        }
+
+        .field { margin-bottom: 17px; }
+
+        .field label {
+            display: block;
+            margin-bottom: 7px;
+            color: #34516b;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .field input,
+        .field select {
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            background: #fbfdff;
+            font-size: 13px;
+            color: #29445d;
+            outline: none;
+            transition: .2s;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            border-color: var(--teal);
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(7, 155, 145, .12);
+        }
+
+        .login-button {
+            width: 100%;
+            margin-top: 6px;
+            padding: 14px;
+            border: none;
+            border-radius: 11px;
+            background: linear-gradient(90deg, #08b8a5, #078e91);
+            color: white;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 8px 18px rgba(7, 155, 145, .3);
+            transition: .2s;
+        }
+
+        .login-button:hover { transform: translateY(-1px); box-shadow: 0 12px 22px rgba(7, 155, 145, .38); }
+        .login-button:disabled { opacity: .65; cursor: not-allowed; transform: none; }
+
+        .status-msg {
+            display: none;
+            margin-top: 14px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            font-size: 12.5px;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+        .status-msg.ok { display: block; background: #e0f8f1; color: #07866e; border: 1px solid #9fe5d1; }
+        .status-msg.err { display: block; background: #fdecea; color: #c43b2d; border: 1px solid #f5c2bd; }
+
+        .create-account {
+            margin-top: 22px;
+            text-align: center;
+            color: #8799a9;
+            font-size: 12.5px;
+        }
+
+        .create-account a {
+            color: #078e86;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .create-account a:hover { text-decoration: underline; }
+
+        .notice {
+            margin: 18px 0 0;
+            padding: 11px 13px;
+            border-radius: 9px;
+            background: #f1f8f9;
+            color: #5f7a8c;
+            font-size: 11px;
+            line-height: 1.7;
+            text-align: center;
+        }
+
+        .secure-note {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 10px;
+            color: #7890a2;
+        }
+
+        @media (max-width: 760px) {
+            body { padding: 12px; }
+            .login-layout { grid-template-columns: 1fr; min-height: 0; }
+            .login-hero { min-height: 220px; padding: 26px; }
+            .hero-message h1 { font-size: 27px; }
+            .hero-footer { display: none; }
+            .login-content { padding: 28px 23px; }
+            .rl-emblem { width: 46px; height: 46px; }
+            .rl-wordmark { font-size: 26px; }
+            .rl-tagline { font-size: 8.5px; letter-spacing: 1.2px; white-space: normal; }
+        }
+    </style>
+</head>
+
+<body class="login-page">
+
+    <main class="login-layout">
+
+        <!-- LEFT: brand + message -->
+        <section class="login-hero">
+            <div class="rl-brand">
+                <svg class="rl-emblem" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <defs>
+                        <linearGradient id="emblemGrad" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0" stop-color="#5df0d9"/>
+                            <stop offset="1" stop-color="#079b91"/>
+                        </linearGradient>
+                    </defs>
+                    <path fill="url(#emblemGrad)" d="M24 43C8 31 3 22 3 14.5 3 8.7 7.6 4.5 13 4.5c4.4 0 8.4 2.5 11 6.6 2.6-4.1 6.6-6.6 11-6.6 5.4 0 10 4.2 10 10 0 7.5-5 16.5-21 28.5z"/>
+                    <rect x="21.8" y="13" width="4.4" height="16" rx="2.2" fill="#fff"/>
+                    <rect x="16" y="18.8" width="16" height="4.4" rx="2.2" fill="#fff"/>
+                </svg>
+
+                <div class="rl-brand-text">
+                    <div class="rl-wordmark">Relief<span>Link</span></div>
+                    <div class="rl-tagline">COMMUNITY EMERGENCY RESOURCE PLATFORM</div>
+                </div>
+            </div>
+
+            <div class="hero-message">
+                <h1>Be the help <span>someone is waiting for.</span></h1>
+                <p>
+                    Join our community and help people during emergencies.
+                    Once reviewed and approved by an administrator, you can sign in to the Volunteer Dashboard with your registered email.
+                </p>
+            </div>
+
+            <div class="hero-footer">
+                ♥ Community support · Emergency assistance · Hope for everyone
+            </div>
+        </section>
+
+        <!-- RIGHT: volunteer form -->
+        <section class="login-content">
+            <div class="login-symbol">♥</div>
+
+            <h2>Become a Volunteer</h2>
+
+            <p class="intro">
+                Fill in your details below to apply as a ReliefLink volunteer.
+            </p>
+
+            <form id="volunteerForm">
+
+                <div class="field">
+                    <label for="vName">Full Name</label>
+                    <input
+                        type="text"
+                        id="vName"
+                        name="name"
+                        placeholder="Enter your full name"
+                        autocomplete="name"
+                        required
+                    >
+                </div>
+
+                <div class="field">
+                    <label for="vEmail">Email Address (Use your registered ReliefLink email)</label>
+                    <input
+                        type="email"
+                        id="vEmail"
+                        name="email"
+                        placeholder="you@example.com"
+                        autocomplete="email"
+                        required
+                    >
+                </div>
+
+                <div class="field">
+                    <label for="vPhone">Phone Number</label>
+                    <input
+                        type="tel"
+                        id="vPhone"
+                        name="phone"
+                        placeholder="10-digit mobile number"
+                        inputmode="numeric"
+                        maxlength="10"
+                        pattern="[0-9]{10}"
+                        title="Enter a 10-digit mobile number"
+                        autocomplete="tel"
+                        required
+                    >
+                </div>
+
+                <div class="field">
+                    <label for="vSkill">Support Area</label>
+                    <select id="vSkill" name="skill" required>
+                        <option value="">Select a support area</option>
+                        <option value="Food Distribution">Food Distribution</option>
+                        <option value="Medical Support">Medical Support</option>
+                        <option value="Shelter Support">Shelter Support</option>
+                        <option value="Transport">Transport</option>
+                        <option value="General Assistance">General Assistance</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="login-button primary" id="vSubmitBtn">
+                    Submit Volunteer Application →
+                </button>
+
+                <div id="vStatusMsg" class="status-msg" role="status" aria-live="polite"></div>
+
+            </form>
+
+            <p class="create-account">
+                <a href="user-dashboard.html">← Back to User Dashboard</a> · <a href="login.html">Sign In</a>
+            </p>
+
+            <p class="notice">
+                Your application will be sent to the Administrator Dashboard. Once approved, sign in as a Volunteer using your email and password.
+            </p>
+
+            <div class="secure-note">
+                ♥ &nbsp; ReliefLink — Supporting communities together
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        (function () {
+            const phone = document.getElementById("vPhone");
+            const form = document.getElementById("volunteerForm");
+            const btn = document.getElementById("vSubmitBtn");
+            const msg = document.getElementById("vStatusMsg");
+
+            // Pre-fill name/email/phone if user is currently signed in
+            try {
+                const session = JSON.parse(localStorage.getItem("rl_session") || "null");
+                if (session) {
+                    if (session.name && !document.getElementById("vName").value) {
+                        document.getElementById("vName").value = session.name;
+                    }
+                    if (session.email && !document.getElementById("vEmail").value) {
+                        document.getElementById("vEmail").value = session.email;
+                    }
+                    if (session.phone && phone && !phone.value) {
+                        phone.value = String(session.phone).replace(/\D/g, "").slice(0, 10);
+                    }
+                }
+            } catch (e) {}
+
+            if (phone) {
+                phone.addEventListener("input", function () {
+                    phone.value = phone.value.replace(/\D/g, "").slice(0, 10);
+                });
+            }
+
+            form.addEventListener("submit", async function (e) {
+                e.preventDefault();
+                msg.className = "status-msg";
+                msg.textContent = "";
+
+                const payload = {
+                    name: document.getElementById("vName").value.trim(),
+                    email: document.getElementById("vEmail").value.trim().toLowerCase(),
+                    phone: phone.value.trim(),
+                    skill: document.getElementById("vSkill").value.trim()
+                };
+
+                const originalText = btn.textContent;
+                btn.disabled = true;
+                btn.textContent = "Submitting Application...";
+
+                try {
+                    const res = await fetch("/api/volunteers", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload)
+                    });
+                    const rawText = await res.text();
+                    let data = {};
+                    try { data = JSON.parse(rawText); } catch (e) {}
+
+                    if (!res.ok) {
+                        throw new Error(data.message || data.error || ("Server error (" + res.status + ")"));
+                    }
+
+                    msg.className = "status-msg ok";
+                    msg.textContent = "✓ Application submitted! Once an administrator approves your request, you can log in with " + payload.email + " using the Volunteer role.";
+                    form.reset();
+                } catch (err) {
+                    msg.className = "status-msg err";
+                    msg.textContent = "✕ " + err.message;
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+                }
+            });
+        })();
+    </script>
+
+</body>
+</html>
