@@ -10,3 +10,7 @@ venv/
 backend/uploads/
 .DS_Store
 Thumbs.db
+*.zip
+*copy*
+*backup*
+backend/appnew.py
