@@ -28,6 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent
 FRONTEND_DIR = BASE_DIR.parent
 UPLOAD_DIR = BASE_DIR / "uploads"
 AVATAR_DIR = UPLOAD_DIR / "avatars"
+PROOF_DIR = UPLOAD_DIR / "proofs"
 
 AWS_REGION = os.environ.get("AWS_REGION", "ap-south-1")
 S3_BUCKET = os.environ.get("S3_BUCKET")
@@ -47,6 +48,7 @@ SES_SENDER_EMAIL = os.environ.get("SES_SENDER_EMAIL", "pcasiyadh@gmail.com")
 
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 AVATAR_DIR.mkdir(parents=True, exist_ok=True)
+PROOF_DIR.mkdir(parents=True, exist_ok=True)
 
 ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 MAX_IMAGE_SIZE = 5 * 1024 * 1024  # 5 MB
@@ -129,6 +131,7 @@ class EmergencyRequest(db.Model):
     volunteer_email = db.Column(db.String(150), nullable=True)
     volunteer_name = db.Column(db.String(100), nullable=True)
     offer_status = db.Column(db.String(30), nullable=True, default=None)
+    proof_filename = db.Column(db.String(255), nullable=True)
     created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
 
 class VolunteerApplication(db.Model):
@@ -212,6 +215,7 @@ def initialize_database():
                 "volunteer_email": "VARCHAR(150)",
                 "volunteer_name": "VARCHAR(100)",
                 "offer_status": "VARCHAR(30)",
+                "proof_filename": "VARCHAR(255)",
                 "created_at": "DATETIME"
             }
 
@@ -390,6 +394,11 @@ def request_to_dict(item):
         if user.pincode and str(user.pincode).strip() and str(user.pincode).strip().lower() != "none":
             pincode = str(user.pincode).strip()
 
+    proof_url = (
+        f"/api/requests/proofs/{item.proof_filename}"
+        if getattr(item, "proof_filename", None) else None
+    )
+
     return {
         "id": item.id,
         "name": item.name,
@@ -413,6 +422,8 @@ def request_to_dict(item):
         "volunteer_email": item.volunteer_email,
         "volunteer_name": item.volunteer_name,
         "offer_status": item.offer_status,
+        "proof_filename": getattr(item, "proof_filename", None),
+        "proof_url": proof_url,
         "created_at": item.created_at.isoformat() if getattr(item, "created_at", None) else ""
     }
 
@@ -645,7 +656,7 @@ def health():
     })
 
 # ==================================================
-# 9. EMERGENCY REQUESTS API (Cross-Dashboard Sync)
+# 9. EMERGENCY REQUESTS API (Cross-Dashboard Sync + Photo Proof)
 # ==================================================
 
 @app.route("/api/requests", methods=["GET"])
@@ -834,6 +845,57 @@ def update_request(request_id):
         db.session.rollback()
         app.logger.exception("Failed to update emergency request")
         return error_response("Could not update request status.", 500)
+
+@app.route("/api/requests/<int:request_id>/proof", methods=["POST"])
+def upload_request_proof(request_id):
+    item = db.session.get(EmergencyRequest, request_id)
+    if item is None:
+        return error_response("Request not found.", 404)
+
+    image_file = request.files.get("photo") or request.files.get("proof")
+    if not image_file or not image_file.filename:
+        return error_response("No photo proof file provided.")
+
+    original_name = secure_filename(image_file.filename)
+    if not original_name or "." not in original_name:
+        return error_response("Please select a valid image file.")
+
+    extension = original_name.rsplit(".", 1)[1].lower()
+    if extension not in ALLOWED_IMAGE_EXTENSIONS:
+        return error_response("Unsupported image format. Use PNG, JPG, JPEG, GIF, or WEBP.")
+
+    saved_filename = f"proof_{request_id}_{uuid4().hex}.{extension}"
+    upload_path = PROOF_DIR / saved_filename
+    s3_key = f"proofs/{saved_filename}"
+
+    try:
+        store_image(image_file, s3_key, upload_path)
+    except (BotoCoreError, ClientError, OSError):
+        app.logger.exception("Failed to store proof image for request %s", request_id)
+        return error_response("Could not upload photo proof to storage.", 500)
+
+    item.proof_filename = saved_filename
+    item.offer_status = "Helped"
+    item.status = "Resolved"
+
+    try:
+        db.session.commit()
+        updated_request = request_to_dict(item)
+        return jsonify({
+            "success": True,
+            "message": "Photo proof uploaded and request marked as Helped.",
+            "proof_url": updated_request["proof_url"],
+            "request": updated_request,
+            **updated_request
+        }), 201
+    except SQLAlchemyError:
+        db.session.rollback()
+        app.logger.exception("Failed to save proof filename in database")
+        return error_response("Could not save photo proof record.", 500)
+
+@app.route("/api/requests/proofs/<path:filename>", methods=["GET"])
+def get_request_proof_image(filename):
+    return serve_stored_image(f"proofs/{filename}", filename, PROOF_DIR)
 
 # ==================================================
 # 10. VOLUNTEER REGISTRATION API

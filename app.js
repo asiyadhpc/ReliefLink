@@ -76,6 +76,18 @@ function bloodPill(bloodGroup) {
     return `<span class="pill" style="background:#fee2e2;color:#b91c1c;font-weight:700;font-size:11px;padding:3px 8px;border-radius:12px;">🩸 ${escapeHTML(raw)}</span>`;
 }
 
+function proofLinkHTML(item) {
+    if (!item || !item.proof_url) return "";
+    return `
+        <div style="margin-top:6px;">
+            <a href="${escapeHTML(item.proof_url)}" target="_blank" rel="noopener noreferrer"
+               style="display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:#087e78;background:#e6f8f5;border:1px solid #99ded7;padding:3px 8px;border-radius:6px;text-decoration:none;">
+                📷 View Photo Proof
+            </a>
+        </div>
+    `;
+}
+
 function normalizeRole(value) {
     const role = String(value || "").trim().toLowerCase();
 
@@ -324,14 +336,14 @@ function setupLogin() {
                     })
                 });
 
-                const userObj = result.user || { 
-                    name, 
-                    email, 
-                    role: "user", 
-                    phone: phone || "", 
-                    blood_group: bloodGroup || "", 
-                    bloodGroup: bloodGroup || "", 
-                    pincode: pincode || "" 
+                const userObj = result.user || {
+                    name,
+                    email,
+                    role: "user",
+                    phone: phone || "",
+                    blood_group: bloodGroup || "",
+                    bloodGroup: bloodGroup || "",
+                    pincode: pincode || ""
                 };
                 saveSession(userObj);
 
@@ -798,6 +810,7 @@ async function setupVolunteerDashboard(session) {
                                 </select>
                             </div>
                             ${volunteerAction}
+                            ${proofLinkHTML(item)}
                         </td>
                     </tr>
                 `;
@@ -961,7 +974,10 @@ async function setupAdminDashboard(session) {
                             <td>${formatLocationDisplay(item.location)}${pin}</td>
                             <td>${escapeHTML(getDescription(item))}</td>
                             <td>${priorityPill(item.priority)}</td>
-                            <td>${statusPill(item.status || "Pending")}</td>
+                            <td>
+                                ${statusPill(item.status || "Pending")}
+                                ${proofLinkHTML(item)}
+                            </td>
                         </tr>
                     `;
                 }).join("")

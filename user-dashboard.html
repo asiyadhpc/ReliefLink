@@ -507,7 +507,7 @@ a { color:inherit; }
             <section class="view active" id="view-overview">
 
                 <div class="greet">
-                    <h2 id="greetText">Hello </h2>
+                    <h2 id="greetText">Hello</h2>
                     <p>Here is what is happening in your community today.</p>
                 </div>
 
@@ -847,6 +847,29 @@ a { color:inherit; }
     </div>
 </div>
 
+<!-- Photo Proof Upload Modal (AWS S3) -->
+<div class="modal" id="proofModal" aria-hidden="true">
+    <div class="modal-card">
+        <button type="button" class="modal-x" data-close="proofModal" aria-label="Close">✕</button>
+        <h3>📷 Upload Photo Proof</h3>
+        <p style="margin:6px 0 14px;font-size:12.5px;line-height:1.6;color:var(--muted);">
+            Attach a photo showing the relief assistance delivered. It will be stored securely on Amazon S3 and marked as <strong>Helped</strong>.
+        </p>
+        <input type="hidden" id="proofRequestId" value="">
+        <div class="field">
+            <label for="proofPhotoInput">Select Photo (JPG, PNG, WEBP · Max 5 MB) <span class="req">*</span></label>
+            <input type="file" id="proofPhotoInput" accept="image/png,image/jpeg,image/webp,image/gif">
+        </div>
+        <div id="proofPreviewWrap" style="display:none;margin-bottom:14px;">
+            <img id="proofPreviewImg" alt="Photo proof preview" style="width:100%;max-height:220px;object-fit:contain;border-radius:12px;border:1px solid var(--border);background:var(--surface2);">
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;">
+            <button type="button" class="small-btn" data-close="proofModal">Cancel</button>
+            <button type="button" class="btn" id="submitProofBtn">✓ Upload &amp; Confirm Helped</button>
+        </div>
+    </div>
+</div>
+
 <!-- GPS Permission Dialog Modal -->
 <div class="modal" id="locationPermissionModal" aria-hidden="true">
     <div class="modal-card center">
@@ -1162,7 +1185,7 @@ function updateClock() {
     $("clockDate").textContent = now.toLocaleDateString("en-IN", { weekday:"short", day:"numeric", month:"short", year:"numeric" });
     const h = now.getHours();
     const part = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
-    $("greetText").textContent = `${part}, ${myName()} 👋`;
+    $("greetText").textContent = `${part}, ${myName()}`;
 }
 updateClock();
 setInterval(updateClock, 30000);
@@ -1297,9 +1320,9 @@ function helpActionHTML(item) {
             return `<button class="mini-btn wait" type="button" disabled>⏳ Processing (Awaiting Volunteer Proceed)...</button>`;
         }
         if (offerStatus === "Approved" || item.status === "In Progress") {
-            return `<div class="confirm-box" style="width:100%;margin:0;"><b>Volunteer approved! Did you provide help?</b>
+            return `<div class="confirm-box" style="width:100%;margin:0;"><b>Volunteer approved! Upload photo proof to confirm help:</b>
                 <div class="item-actions" style="margin:0;">
-                    <button class="mini-btn yes" type="button" data-confirm-id="${id}" data-choice="Helped">✓ Helped</button>
+                    <button class="mini-btn yes" type="button" data-confirm-id="${id}" data-choice="Helped">📷 Helped (Upload Proof)</button>
                     <button class="mini-btn no" type="button" data-confirm-id="${id}" data-choice="Not Helped">✕ Not Helped</button>
                 </div></div>`;
         }
@@ -1398,11 +1421,15 @@ function renderMyRequests() {
         if (stage === 2) {
             extra = `<div class="confirm-box"><b>Did the volunteer/helper provide help?</b>
                 <div class="item-actions" style="margin:0;">
-                    <button class="mini-btn yes" type="button" data-confirm-id="${id}" data-choice="Helped">✓ Helped</button>
+                    <button class="mini-btn yes" type="button" data-confirm-id="${id}" data-choice="Helped">📷 Helped (Upload Proof)</button>
                     <button class="mini-btn no" type="button" data-confirm-id="${id}" data-choice="Not Helped">✕ Not Helped</button>
                 </div></div>`;
         } else if (offerStatus === "Not Helped") {
             extra = `<div class="pickup-msg" style="background:#fdecea;color:#c43b2d;">✕ Marked as "Not Helped". The request is open again.</div>`;
+        }
+
+        if (item.proof_url) {
+            extra += `<div class="pickup-msg">📷 Photo proof verified on AWS S3 · <a href="${escapeHTML(item.proof_url)}" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;font-weight:800;">View Photo Proof</a></div>`;
         }
 
         let emailInfo = emailPillHTML("request", idOf(item), item, "Receipt email");
@@ -1558,7 +1585,7 @@ function renderNotifications() {
             if (stage === 1) items.push(["🙋", `Someone offered to help with your request #RL-${id}. Waiting for volunteer approval.` + (item.offer_email_sent === true ? " An email alert was sent to you." : ""), "requests"]);
             if (stage === 2) items.push(["✅", `Help is on the way for #RL-${id}. Please confirm when you receive it.`, "requests"]);
         } else if (String(item.helper_email || "").trim().toLowerCase() === me && stage === 2) {
-            items.push(["🤝", `Your offer for #RL-${id} was approved. Confirm once you have helped.`, "community"]);
+            items.push(["🤝", `Your offer for #RL-${id} was approved. Upload photo proof once you have helped.`, "community"]);
         }
     });
     state.donations.forEach(d => {
@@ -1593,10 +1620,75 @@ function showRequestDetails(id) {
         <dt>Status</dt><dd>${escapeHTML(item.status || "Pending")}</dd>
         <dt>Location</dt><dd>${formatLocationDisplay(item.location)}</dd>
         <dt>Description</dt><dd>${escapeHTML(item.details || item.description || "—")}</dd>
+        ${item.proof_url ? `<dt>Photo Proof</dt><dd><a href="${escapeHTML(item.proof_url)}" target="_blank" rel="noopener noreferrer" style="color:var(--teal);font-weight:700;text-decoration:underline;">📷 View S3 Photo Proof</a></dd>` : ""}
     </dl>
     <p class="form-note">For privacy, requester contact details are not shown. Volunteer coordinators arrange direct support.</p>`;
     openModal("infoModal");
 }
+
+/* ====================== PHOTO PROOF MODAL (AWS S3) ====================== */
+function openProofModal(id) {
+    $("proofRequestId").value = id;
+    $("proofPhotoInput").value = "";
+    $("proofPreviewWrap").style.display = "none";
+    $("proofPreviewImg").src = "";
+    openModal("proofModal");
+}
+
+$("proofPhotoInput").addEventListener("change", e => {
+    const file = e.target.files?.[0];
+    if (!file) {
+        $("proofPreviewWrap").style.display = "none";
+        return;
+    }
+    if (!file.type.startsWith("image/")) {
+        toast("Please select a valid image file.", "error");
+        e.target.value = "";
+        return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+        toast("The image must be 5 MB or smaller.", "error");
+        e.target.value = "";
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = evt => {
+        $("proofPreviewImg").src = evt.target.result;
+        $("proofPreviewWrap").style.display = "block";
+    };
+    reader.readAsDataURL(file);
+});
+
+$("submitProofBtn").addEventListener("click", async () => {
+    const id = $("proofRequestId").value;
+    const file = $("proofPhotoInput").files?.[0];
+    if (!id) return;
+    if (!file) {
+        toast("Please select a photo proof image first.", "error");
+        return;
+    }
+
+    const btn = $("submitProofBtn");
+    const formData = new FormData();
+    formData.append("photo", file);
+
+    try {
+        btn.disabled = true;
+        btn.textContent = "Uploading to S3...";
+        await fetchJSON(`/api/requests/${encodeURIComponent(id)}/proof`, {
+            method: "POST",
+            body: formData
+        });
+        closeModal("proofModal");
+        toast("Photo proof uploaded to AWS S3 and marked as Helped!", "success");
+        await loadRequests();
+    } catch (err) {
+        toast(err.message || "Failed to upload photo proof.", "error");
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "✓ Upload & Confirm Helped";
+    }
+});
 
 /* ====================== ACTIONS ====================== */
 async function offerHelp(id, btn) {
@@ -1619,13 +1711,17 @@ async function offerHelp(id, btn) {
 }
 
 async function sendConfirmation(id, choice, btn) {
+    if (choice === "Helped") {
+        openProofModal(id);
+        return;
+    }
     try {
         btn.disabled = true;
         await fetchJSON(`/api/requests/${id}`, {
             method:"PATCH", headers:{ "Content-Type":"application/json" },
             body:JSON.stringify({ confirmation:choice })
         });
-        toast(choice === "Helped" ? "Thank you! Marked as helped." : "Noted. The request is open again.", "success");
+        toast("Noted. The request is open again.", "success");
         await loadRequests();
     } catch (err) {
         toast(err.message || "Failed to update confirmation.", "error");
@@ -1689,7 +1785,7 @@ document.addEventListener("click", e => {
 
 document.addEventListener("keydown", e => {
     if (e.key === "Escape") {
-        ["infoModal", "qrModal", "locationPermissionModal"].forEach(closeModal);
+        ["infoModal", "proofModal", "qrModal", "locationPermissionModal"].forEach(closeModal);
         $("notifPop").classList.remove("open");
         closeSidebar();
     }
@@ -1829,6 +1925,7 @@ $("confirmLocationModalBtn").addEventListener("click", () => {
 
 $("getGpsBtn").addEventListener("click", () => requestGpsPrompt("location", "getGpsBtn"));
 $("getDonationGpsBtn").addEventListener("click", () => requestGpsPrompt("donationLocation", "getDonationGpsBtn"));
+
 /* ====================== SUBMIT REQUEST ====================== */
 $("requestForm").addEventListener("submit", async event => {
     event.preventDefault();
